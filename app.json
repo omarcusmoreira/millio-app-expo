@@ -7,24 +7,33 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
+    "scheme": "milio",
     "splash": {
-      "image": "./assets/splash-icon.png",
+      "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#FBFBFA"
     },
     "ios": {
-      "supportsTablet": true
+      "bundleIdentifier": "com.milio.app",
+      "supportsTablet": false
     },
     "android": {
+      "package": "com.milio.app",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#FBFBFA"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false
     },
     "web": {
-      "favicon": "./assets/favicon.png"
-    }
+      "bundler": "metro",
+      "favicon": "./assets/favicon-48.png"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      "expo-localization"
+    ]
   }
 }

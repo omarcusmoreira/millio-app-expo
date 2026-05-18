@@ -1,6 +1,38 @@
 {
   "extends": "expo/tsconfig.base",
   "compilerOptions": {
-    "strict": true
-  }
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": [
+        "src/*"
+      ],
+      "@/domain/*": [
+        "src/domain/*"
+      ],
+      "@/store/*": [
+        "src/store/*"
+      ],
+      "@/ui/*": [
+        "src/ui/*"
+      ],
+      "@/i18n/*": [
+        "src/i18n/*"
+      ],
+      "@/infra/*": [
+        "src/infra/*"
+      ]
+    }
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    ".expo/types/**/*.d.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "src/features/_support"
+  ]
 }

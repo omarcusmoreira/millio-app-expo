@@ -1,0 +1,476 @@
+{
+  "_meta": {
+    "locale": "pt-BR",
+    "sourceOfTruth": true,
+    "note": "Toda string de UI Milio em pt-BR. Mantém paridade total com messages.en-US.json (ver Inv-12)."
+  },
+  "common": {
+    "continue": "Continuar",
+    "back": "Voltar",
+    "save": "Salvar",
+    "cancel": "Cancelar",
+    "add": "Adicionar",
+    "remove": "Remover",
+    "delete": "Excluir",
+    "confirm": "Confirmar",
+    "close": "Fechar",
+    "edit": "Editar",
+    "open": "Abrir",
+    "yes": "Sim",
+    "no": "Não",
+    "skip": "Pular essa etapa",
+    "skipDone": "Pronto",
+    "tryAgain": "Tentar de novo",
+    "loading": "Carregando…",
+    "error": "Algo deu errado",
+    "today": "hoje",
+    "tomorrow": "amanhã",
+    "yesterday": "ontem",
+    "perMonth": "/mês",
+    "and": "e",
+    "goal": "Meta"
+  },
+  "currency": {
+    "symbol": "R$",
+    "format": "R$ {{value}}",
+    "negativeFormat": "−R$ {{value}}",
+    "_thousands": ".",
+    "_decimal": ",",
+    "_decimals": 2
+  },
+  "splash": {
+    "headline1": "Planejar sem ansiedade.",
+    "headline2": "Gastar sem culpa.",
+    "primary": "Começar",
+    "secondary": "Já tenho conta"
+  },
+  "auth": {
+    "method": {
+      "titleSignup": "Vamos começar.",
+      "titleSignin": "Que bom te ver.",
+      "subSignup": "Escolha como continuar.",
+      "subSignin": "Escolha como entrar.",
+      "appleBtn": "Continuar com Apple",
+      "googleBtn": "Continuar com Google",
+      "or": "OU",
+      "emailBtn": "Continuar com e-mail"
+    },
+    "email": {
+      "title": "Seu e-mail.",
+      "subMagic": "A gente manda um código de 6 dígitos.",
+      "subPassword": "A gente pede uma senha em seguida.",
+      "placeholder": "voce@exemplo.com",
+      "sendCode": "Mandar código",
+      "usePassword": "Usar senha"
+    },
+    "password": {
+      "title": "Defina uma senha.",
+      "forLabel": "Para",
+      "placeholder": "Pelo menos 8 caracteres",
+      "minimum": "MÍNIMO"
+    },
+    "magic": {
+      "title": "Olhe seu e-mail.",
+      "subWithEmail": "Mandamos um código de 6 dígitos pra {{email}}",
+      "placeholder": "000000",
+      "resend": "Reenviar código",
+      "verify": "Confirmar"
+    },
+    "identity": {
+      "title": "Como te chamamos?",
+      "sub": "Só seu primeiro nome. Essa é sua identidade no lar.",
+      "label": "Primeiro nome",
+      "placeholder": "Marcos"
+    }
+  },
+  "onboarding": {
+    "stepIndicator": "{{current}}/{{total}} · {{label}}",
+    "steps": {
+      "bills": "Suas contas",
+      "incomes": "Sua renda",
+      "silos": "Seus silos",
+      "lar": "Seu lar"
+    },
+    "bills": {
+      "title": "Suas contas, no mesmo lugar.",
+      "sub": "Tudo que sai todo mês vive aqui. O Milio reserva o dinheiro antes de mostrar o livre pra gastar — você não esquece, e não se preocupa.",
+      "preview": "Contas · maio",
+      "footer": "Você adiciona aos poucos, dentro do app. Algumas variam de mês a mês — o Milio estima."
+    },
+    "incomes": {
+      "title": "Cada um cuida da sua renda.",
+      "sub": "Sua renda fica no seu perfil — cada pessoa do lar configura a dela. O Milio entende quanto entra e quando cai.",
+      "preview": "Perfil · {{name}}",
+      "footer": "Você configura no seu perfil, quando quiser. Sem pressa."
+    },
+    "silos": {
+      "title": "Silos guardam seus objetivos.",
+      "sub": "Reserva de emergência, viagem, casa nova. O que está num silo não conta no livre pra gastar — fica armazenado, grão a grão.",
+      "preview": "Silos",
+      "footer": "Você cria os silos que fazem sentido. Sem número mágico, sem regra."
+    },
+    "lar": {
+      "title": "Quer dividir com alguém?",
+      "sub": "Um lar é pra quem divide despesas — parceiro, família, roommates. Todos veem o mesmo número, dividem as contas. Dá pra ficar só você e convidar depois.",
+      "createTitle": "Criar um lar e convidar",
+      "createSub": "Pra casais, famílias e roommates. Convide o resto depois.",
+      "joinTitle": "Entrar num lar",
+      "joinSub": "Use o código de convite que alguém te mandou.",
+      "soloTitle": "Por enquanto, só eu",
+      "soloSub": "Orçamento solo. Você pode convidar gente depois."
+    },
+    "larName": {
+      "title": "Como vai chamar?",
+      "sub": "Coloca qualquer coisa, ou pula. Dá pra mudar depois.",
+      "placeholder": "Lar dos {{lastname}}",
+      "defaultLastname": "Carvalho",
+      "skip": "Deixar o padrão"
+    },
+    "larInvite": {
+      "title": "Convide seu lar.",
+      "sub": "Mande o código ou o link. Eles entram de qualquer aparelho.",
+      "codeLabel": "Código",
+      "linkLabel": "Link",
+      "copy": "Copiar",
+      "copied": "Copiado ✓",
+      "skip": "Convido depois"
+    },
+    "larJoin": {
+      "title": "Tem um convite?",
+      "sub": "Cole o código ou o link que te mandaram.",
+      "placeholder": "MILIO-XXX-XXXX",
+      "found": "Entrar no {{name}}",
+      "notFound": "Código não reconhecido. Confirme com quem te mandou.",
+      "members": "{{count}} MEMBROS",
+      "tryHint": "TENTE: MILIO-742-CORN"
+    },
+    "done": {
+      "title": "Pronto, {{firstName}}.",
+      "titleSolo": "Pronto.",
+      "subStandard": "O Milio calcula o que vai sobrar e estima quanto você pode gastar por semana. Sem culpa. Sem estourar.",
+      "subJoined": "Você entrou no lar. O Milio já está fazendo a conta — abra pra ver.",
+      "previewLabel": "Início · Livre pra gastar",
+      "previewWeek": "Essa semana",
+      "previewSub": "PRÓXIMO EM {{days}}D · SALÁRIO DE {{name}}",
+      "previewSpent": "R$ 0 GASTO",
+      "footnote": "O cálculo é simples: livre pra gastar dividido pelos dias até o próximo salário, vezes 7. Você ajusta se quiser.",
+      "subline": "Sem ansiedade. Sem culpa.",
+      "primary": "Abrir Milio",
+      "opening": "Abrindo…"
+    }
+  },
+  "home": {
+    "tabLabel": "Início",
+    "freeToSpend": "Livre pra gastar",
+    "nextIn": "PRÓXIMO EM {{days}}D · {{date}}",
+    "daysLeftInMonth": "{{days}}D ATÉ O FIM DO MÊS",
+    "paycheckOf": "Salário de {{name}}",
+    "pendingThisMonth": "Pendente este mês",
+    "billsCount": "{{count}} CONTAS",
+    "inSilos": "Nos silos",
+    "silosCount": "{{count}} SILOS",
+    "comingUp": "Próximas",
+    "paidCount": "{{paid}} PAGAS · {{remaining}} A PAGAR",
+    "seeAll": "Ver todas as contas →"
+  },
+  "bills": {
+    "tabLabel": "Contas",
+    "title": "Contas",
+    "viewingPast": "MÊS PASSADO · HISTÓRICO",
+    "viewingFuture": "MÊS FUTURO · PROJEÇÃO",
+    "filter": {
+      "all": "Todas",
+      "upcoming": "Próximas",
+      "unpaid": "Não pagas",
+      "paid": "Pagas"
+    },
+    "summary": {
+      "pending": "Pendente",
+      "projected": "Projetado",
+      "paid": "Pago"
+    },
+    "newObligation": "Nova conta",
+    "empty": "Nada por aqui.",
+    "estimate": "EST",
+    "paidOn": "PAGA {{date}}",
+    "due": {
+      "today": "hoje",
+      "tomorrow": "amanhã",
+      "yesterday": "ontem",
+      "lateDays": "{{n}} dias atrasada",
+      "inDays": "em {{n}} dias"
+    },
+    "detail": {
+      "titlePaid": "Conta paga",
+      "titlePending": "Conta",
+      "markPaid": "Marcar como paga",
+      "assignedTo": "Responsável",
+      "repeats": "Repete",
+      "paidFrom": "Pago de",
+      "tags": "Etiquetas",
+      "amountUnknown": "Valor desconhecido",
+      "estAvg": "média dos últimos 3 meses"
+    },
+    "pay": {
+      "title": "Pagar {{name}}",
+      "amount": "Valor pago",
+      "estWas": "Estimativa era ~{{value}}",
+      "paidFrom": "Pago de",
+      "submit": "Marcar paga · {{value}}",
+      "successFlash": "{{name}} marcada como paga"
+    },
+    "recurrence": {
+      "monthly": "Todo mês",
+      "bi-monthly": "A cada 2 meses",
+      "weekly": "Toda semana",
+      "biweekly": "A cada 2 semanas",
+      "yearly": "Uma vez por ano",
+      "one-time": "Uma vez"
+    }
+  },
+  "silos": {
+    "tabLabel": "Silos",
+    "title": "Silos",
+    "notSpendable": "NÃO GASTÁVEL",
+    "totalStored": "Total armazenado",
+    "summary": "{{count}} SILOS · VALORES MANUAIS",
+    "newSilo": "Novo silo",
+    "ago": {
+      "days": "HÁ {{n}}D",
+      "weeks": "HÁ {{n}}SEM",
+      "months": "HÁ {{n}}M",
+      "years": "HÁ {{n}}A"
+    },
+    "detail": {
+      "title": "{{name}}",
+      "lastUpdate": "Última atualização {{date}}",
+      "type": "Tipo",
+      "note": "Nota",
+      "transfer": "Transferir",
+      "updateValue": "Atualizar valor",
+      "explainer": "O que está num silo fica fora do seu dinheiro gastável. Reavaliar nunca muda o \"livre pra gastar\". Só uma transferência muda."
+    },
+    "update": {
+      "newValue": "Novo valor",
+      "noChange": "Sem mudança",
+      "deltaVs": "{{sign}}{{value}} vs. valor anterior",
+      "explainer": "Isso não move dinheiro. Atualizar um silo nunca muda seu \"livre pra gastar\".",
+      "save": "Salvar novo valor",
+      "successFlash": "{{name}} atualizado para {{value}}"
+    }
+  },
+  "addSheet": {
+    "title": "Adicionar",
+    "askKind": "Que tipo de movimentação?",
+    "kinds": {
+      "expense": {
+        "title": "Despesa",
+        "sub": "Dinheiro consumido. Mercado, jantar, uma conta avulsa."
+      },
+      "income": {
+        "title": "Renda",
+        "sub": "Dinheiro recebido. Bônus, presente, restituição, ou um pagamento avulso."
+      },
+      "transfer": {
+        "title": "Transferência",
+        "sub": "Dinheiro preservado. Pra um silo ou de volta pra você."
+      },
+      "asset": {
+        "title": "Silo",
+        "sub": "Poupança, imóvel, investimento. Armazene fora do gastável."
+      },
+      "bill": {
+        "title": "Conta",
+        "sub": "Conta recorrente que vai entrar todo mês."
+      }
+    },
+    "expense": {
+      "amount": "Valor gasto",
+      "name": "Foi com quê",
+      "namePlaceholder": "Mercado, jantar…",
+      "paidFrom": "Pago de",
+      "whoPaid": "Quem pagou",
+      "submit": "Registrar despesa",
+      "successFlash": "Despesa registrada"
+    },
+    "transfer": {
+      "amount": "Valor",
+      "swapHint": "Inverter direção",
+      "cashAccount": "Conta de caixa",
+      "silo": "Silo",
+      "from": "De",
+      "to": "Para",
+      "fromCash": "Caixa",
+      "toSilo": "Silo",
+      "explainerToSilo": "Esse {{value}} sai do livre pra gastar. O valor de {{name}} sobe na mesma medida.",
+      "explainerFromSilo": "Esse {{value}} volta pro livre pra gastar. O valor de {{name}} cai na mesma medida.",
+      "submit": "Confirmar transferência",
+      "successFlashToSilo": "{{value}} guardado em {{name}}",
+      "successFlashFromSilo": "{{value}} retirado de {{name}}"
+    },
+    "income": {
+      "amount": "Valor recebido",
+      "source": "Origem",
+      "sourcePlaceholder": "Bônus, presente, restituição…",
+      "whoReceived": "Quem recebeu",
+      "depositedTo": "Depositado em",
+      "submit": "Registrar renda",
+      "successFlash": "Renda registrada"
+    },
+    "newBill": {
+      "name": "Nome",
+      "namePlaceholder": "Luz, academia, lanche da escola…",
+      "amount": "Valor",
+      "variableLabel": "Valor variável",
+      "estimatePlaceholder": "Estimativa (opcional)",
+      "dueDate": "Vencimento",
+      "repeatsMonthly": "Repete todo mês",
+      "endsAtToggle": "Número fixo de parcelas",
+      "installments": "Quantas parcelas?",
+      "installmentsPlaceholder": "Ex: 12",
+      "assignee": "Responsável",
+      "submit": "Adicionar obrigação",
+      "successFlash": "Obrigação adicionada"
+    }
+  },
+  "allowance": {
+    "thisWeek": "Essa semana",
+    "remaining": "Restante",
+    "of": "de",
+    "logSpend": "Atualizar",
+    "spent": "{{value}} GASTO",
+    "youSet": "VOCÊ DEFINIU",
+    "weekDots": [
+      "S",
+      "T",
+      "Q",
+      "Q",
+      "S",
+      "S",
+      "D"
+    ],
+    "sheet": {
+      "title": "Essa semana",
+      "remainingHeading": "Restante",
+      "fromWeekly": "DE {{value}} POR SEMANA · {{spent}} GASTO",
+      "suggested": "Sugerido",
+      "youSetLabel": "Você definiu",
+      "auto": "AUTO",
+      "custom": "PERSONALIZADO",
+      "nextIn": "Próxima entrada",
+      "spentThisWeek": "Gasto essa semana",
+      "nothingLogged": "Nada registrado ainda.",
+      "log": "Registrar {{value}}",
+      "saveBudget": "Salvar",
+      "useSuggested": "Usar sugestão",
+      "logSpendBtn": "Registrar gasto",
+      "adjustBtn": "Ajustar mesada",
+      "amountSpent": "Valor gasto",
+      "whatWasItFor": "Foi com quê",
+      "placeholder": "Café, gasolina, comida…",
+      "paidFrom": "Pago de",
+      "counts": "Conta na sua mesada semanal e entra na atividade do lar.",
+      "yourWeekly": "Sua mesada semanal",
+      "preset": {
+        "conservative": "CONSERVADOR",
+        "moderate": "MODERADO",
+        "suggested": "SUGERIDO"
+      },
+      "calc": "{{free}} ÷ {{days}} DIAS",
+      "perWeek": "POR SEMANA",
+      "logFlash": "{{value}} registrado",
+      "updatedFlash": "Mesada semanal atualizada",
+      "resetFlash": "Voltou pra sugestão"
+    }
+  },
+  "lar": {
+    "tabLabel": "Conta",
+    "eyebrow": "Meu lar",
+    "members": "Membros",
+    "pendingOne": "{{count}} pendente",
+    "pendingMany": "{{count}} pendentes",
+    "settled": "{{count}} contas · tudo certo",
+    "invite": "Convidar alguém",
+    "setup": "Configuração",
+    "setupItems": {
+      "categories": "Categorias",
+      "labels": "Etiquetas",
+      "accounts": "Contas bancárias"
+    },
+    "recentActivity": "Atividade recente",
+    "verbs": {
+      "expense": "gastou em",
+      "income": "recebeu",
+      "transfer-in": "moveu",
+      "transfer-out": "tirou",
+      "asset-update": "reavaliou",
+      "bill-payment": "pagou"
+    }
+  },
+  "member": {
+    "monthlyIncome": "Renda mensal",
+    "receivedThisYear": "Recebido este ano",
+    "recurringIncome": "Renda recorrente",
+    "billsAssigned": "Contas atribuídas",
+    "pendingMany": "{{count}} contas pendentes",
+    "pendingOne": "{{count}} conta pendente",
+    "settled": "Tudo em dia",
+    "emptyIncomes": "Sem renda recorrente para {{name}} ainda. Toque em + Adicionar para configurar um salário ou pagamento fixo.",
+    "emptyBills": "{{name}} ainda não tem nenhuma conta atribuída.",
+    "scheduleMonthly": "Todo dia {{day}}",
+    "scheduleSplit": "Dia {{d1}} e dia {{d2}} de cada mês",
+    "scheduleBiweekly": "A cada duas semanas"
+  },
+  "setup": {
+    "categories": {
+      "eyebrow": "Configuração · Meu lar",
+      "title": "Categorias",
+      "subtitle": "Pra agrupar contas, despesas e itens do silo. Fica entre vocês — o Milio nunca analisa.",
+      "newBtn": "Nova categoria",
+      "usage": "{{n}} usos",
+      "editTitle": "Editar categoria",
+      "newTitle": "Nova categoria",
+      "name": "Nome",
+      "namePlaceholder": "Mercado, filhos, serviços…",
+      "dotColor": "Cor do ponto",
+      "addedFlash": "Categoria adicionada",
+      "updatedFlash": "Categoria atualizada",
+      "removedFlash": "Categoria removida"
+    },
+    "labels": {
+      "eyebrow": "Configuração · Meu lar",
+      "title": "Etiquetas",
+      "subtitle": "Marcadores leves que você pode juntar em qualquer coisa. Uma conta pode ter várias.",
+      "newBtn": "Nova etiqueta",
+      "editTitle": "Editar etiqueta",
+      "newTitle": "Nova etiqueta",
+      "namePlaceholder": "Débito automático, férias, dedutível…",
+      "addedFlash": "Etiqueta adicionada",
+      "updatedFlash": "Etiqueta atualizada",
+      "removedFlash": "Etiqueta removida"
+    },
+    "accounts": {
+      "eyebrow": "Configuração · Meu lar",
+      "title": "Contas bancárias",
+      "subtitle": "De onde você paga. O Milio não se conecta ao seu banco — só lembra qual conta você usou.",
+      "newBtn": "Nova conta bancária",
+      "editTitle": "Editar conta",
+      "newTitle": "Nova conta bancária",
+      "namePlaceholder": "Itaú corrente, Nubank conjunta…",
+      "last4": "Últimos 4 dígitos",
+      "owner": "Titular",
+      "addedFlash": "Conta adicionada",
+      "updatedFlash": "Conta atualizada",
+      "removedFlash": "Conta removida"
+    }
+  },
+  "errors": {
+    "generic": "Algo deu errado. Tenta de novo.",
+    "network": "Sem conexão. Verifica sua internet.",
+    "invalidEmail": "E-mail inválido.",
+    "invalidCode": "Código inválido.",
+    "invalidDate": "Data inválida.",
+    "amountZero": "O valor precisa ser maior que zero.",
+    "nameRequired": "Coloca um nome."
+  }
+}

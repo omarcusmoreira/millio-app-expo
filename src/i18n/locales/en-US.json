@@ -1,0 +1,475 @@
+{
+  "_meta": {
+    "locale": "en-US",
+    "sourceOfTruth": false,
+    "note": "Translated from messages.pt-BR.json. Must keep keyset parity (Inv-12)."
+  },
+  "common": {
+    "continue": "Continue",
+    "back": "Back",
+    "save": "Save",
+    "cancel": "Cancel",
+    "add": "Add",
+    "remove": "Remove",
+    "delete": "Delete",
+    "confirm": "Confirm",
+    "close": "Close",
+    "edit": "Edit",
+    "open": "Open",
+    "yes": "Yes",
+    "no": "No",
+    "skip": "Skip this step",
+    "skipDone": "Done",
+    "tryAgain": "Try again",
+    "loading": "Loading…",
+    "error": "Something went wrong",
+    "today": "today",
+    "tomorrow": "tomorrow",
+    "yesterday": "yesterday",
+    "perMonth": "/mo",
+    "and": "and",
+    "goal": "Goal"
+  },
+  "currency": {
+    "symbol": "$",
+    "format": "${{value}}",
+    "negativeFormat": "−${{value}}",
+    "_thousands": ",",
+    "_decimal": ".",
+    "_decimals": 2
+  },
+  "splash": {
+    "headline1": "Plan without anxiety.",
+    "headline2": "Spend without guilt.",
+    "primary": "Get started",
+    "secondary": "I already have an account"
+  },
+  "auth": {
+    "method": {
+      "titleSignup": "Set up Milio.",
+      "titleSignin": "Welcome back.",
+      "subSignup": "Pick how you want to continue.",
+      "subSignin": "Pick how you want to sign in.",
+      "appleBtn": "Continue with Apple",
+      "googleBtn": "Continue with Google",
+      "or": "OR",
+      "emailBtn": "Continue with email"
+    },
+    "email": {
+      "title": "Your email.",
+      "subMagic": "We'll send you a 6-digit code.",
+      "subPassword": "We'll ask for a password next.",
+      "placeholder": "you@example.com",
+      "sendCode": "Send a code",
+      "usePassword": "Use password"
+    },
+    "password": {
+      "title": "Set a password.",
+      "forLabel": "For",
+      "placeholder": "At least 8 characters",
+      "minimum": "MINIMUM"
+    },
+    "magic": {
+      "title": "Check your inbox.",
+      "subWithEmail": "Sent a 6-digit code to {{email}}",
+      "placeholder": "000000",
+      "resend": "Resend code",
+      "verify": "Verify"
+    },
+    "identity": {
+      "title": "What should we call you?",
+      "sub": "Just your first name. That's your identity in the household.",
+      "label": "First name",
+      "placeholder": "Marcus"
+    }
+  },
+  "onboarding": {
+    "stepIndicator": "{{current}}/{{total}} · {{label}}",
+    "steps": {
+      "bills": "Your bills",
+      "incomes": "Your income",
+      "silos": "Your silos",
+      "lar": "Your household"
+    },
+    "bills": {
+      "title": "All your bills, in one place.",
+      "sub": "Everything that goes out every month lives here. Milio sets the money aside before showing your free-to-spend — you don't forget, and you don't worry.",
+      "preview": "Bills · May",
+      "footer": "You'll add them little by little, inside the app. Some vary month to month — Milio estimates."
+    },
+    "incomes": {
+      "title": "Each person owns their income.",
+      "sub": "Your income lives in your profile — each person in the household sets up their own. Milio knows how much comes in and when.",
+      "preview": "Profile · {{name}}",
+      "footer": "Configure in your profile, whenever you want. No rush."
+    },
+    "silos": {
+      "title": "Silos hold your goals.",
+      "sub": "Emergency fund, a trip, a new house. What's in a silo doesn't count in free-to-spend — it sits stored, grain by grain.",
+      "preview": "Silos",
+      "footer": "Create the silos that make sense for you. No magic number, no rule."
+    },
+    "lar": {
+      "title": "Want to share with anyone?",
+      "sub": "A household is for people who split expenses — partner, family, roommates. Everyone sees the same number, splits the bills. It's fine to start solo and invite later.",
+      "createTitle": "Create a household and invite",
+      "createSub": "For couples, families, and roommates. Invite the rest after.",
+      "joinTitle": "Join a household",
+      "joinSub": "Use the invite code someone sent you.",
+      "soloTitle": "Just me for now",
+      "soloSub": "Solo budget. You can invite people later."
+    },
+    "larName": {
+      "title": "What do you want to call it?",
+      "sub": "Anything works, or skip — you can change it later.",
+      "placeholder": "The {{lastname}} household",
+      "defaultLastname": "Carvalho",
+      "skip": "Keep default"
+    },
+    "larInvite": {
+      "title": "Invite your household.",
+      "sub": "Send a code or a link. They can join from any device.",
+      "codeLabel": "Code",
+      "linkLabel": "Link",
+      "copy": "Copy",
+      "copied": "Copied ✓",
+      "skip": "I'll do this later"
+    },
+    "larJoin": {
+      "title": "Got an invite?",
+      "sub": "Paste the code or link someone sent you.",
+      "placeholder": "MILIO-XXX-XXXX",
+      "found": "Join {{name}}",
+      "notFound": "Code not recognized. Check with the sender.",
+      "members": "{{count}} MEMBERS",
+      "tryHint": "TRY: MILIO-742-CORN"
+    },
+    "done": {
+      "title": "All set, {{firstName}}.",
+      "titleSolo": "All set.",
+      "subStandard": "Milio works out what's left and estimates how much you can spend per week. No guilt. No overshooting.",
+      "subJoined": "You're in. Milio is already doing the math — open it to see.",
+      "previewLabel": "Home · Free to spend",
+      "previewWeek": "This week",
+      "previewSub": "NEXT IN {{days}}D · {{name}}'S PAYCHECK",
+      "previewSpent": "$0 SPENT",
+      "footnote": "The math is simple: free-to-spend divided by days until your next paycheck, times 7. You can adjust it.",
+      "subline": "No anxiety. No guilt.",
+      "primary": "Open Milio",
+      "opening": "Opening…"
+    }
+  },
+  "home": {
+    "freeToSpend": "Free to spend",
+    "nextIn": "NEXT IN {{days}}D · {{date}}",
+    "daysLeftInMonth": "{{days}}D LEFT IN MONTH",
+    "paycheckOf": "{{name}}'s paycheck",
+    "pendingThisMonth": "Pending this month",
+    "billsCount": "{{count}} BILLS",
+    "inSilos": "In silos",
+    "silosCount": "{{count}} SILOS",
+    "comingUp": "Coming up",
+    "paidCount": "{{paid}} PAID · {{remaining}} LEFT",
+    "seeAll": "See all bills →"
+  },
+  "bills": {
+    "tabLabel": "Bills",
+    "title": "Bills",
+    "viewingPast": "PAST MONTH · HISTORICAL",
+    "viewingFuture": "FUTURE MONTH · PROJECTED",
+    "filter": {
+      "all": "All",
+      "upcoming": "Upcoming",
+      "unpaid": "Unpaid",
+      "paid": "Paid"
+    },
+    "summary": {
+      "pending": "Pending",
+      "projected": "Projected",
+      "paid": "Paid"
+    },
+    "newObligation": "New bill",
+    "empty": "Nothing here.",
+    "estimate": "EST",
+    "paidOn": "PAID {{date}}",
+    "due": {
+      "today": "today",
+      "tomorrow": "tomorrow",
+      "yesterday": "yesterday",
+      "lateDays": "{{n}} days late",
+      "inDays": "in {{n}} days"
+    },
+    "detail": {
+      "titlePaid": "Paid bill",
+      "titlePending": "Bill",
+      "markPaid": "Mark as paid",
+      "assignedTo": "Assigned to",
+      "repeats": "Repeats",
+      "paidFrom": "Paid from",
+      "tags": "Tags",
+      "amountUnknown": "Amount unknown",
+      "estAvg": "last 3 months avg"
+    },
+    "pay": {
+      "title": "Pay {{name}}",
+      "amount": "Amount paid",
+      "estWas": "Estimate was ~{{value}}",
+      "paidFrom": "Paid from",
+      "submit": "Mark paid · {{value}}",
+      "successFlash": "{{name}} marked paid"
+    },
+    "recurrence": {
+      "monthly": "Every month",
+      "bi-monthly": "Every 2 months",
+      "weekly": "Every week",
+      "biweekly": "Every 2 weeks",
+      "yearly": "Once a year",
+      "one-time": "One-off"
+    }
+  },
+  "silos": {
+    "tabLabel": "Silos",
+    "title": "Silos",
+    "notSpendable": "NOT SPENDABLE",
+    "totalStored": "Total stored",
+    "summary": "{{count}} SILOS · MANUAL VALUES",
+    "newSilo": "New silo",
+    "ago": {
+      "days": "{{n}}D AGO",
+      "weeks": "{{n}}W AGO",
+      "months": "{{n}}MO AGO",
+      "years": "{{n}}Y AGO"
+    },
+    "detail": {
+      "title": "{{name}}",
+      "lastUpdate": "Last updated {{date}}",
+      "type": "Type",
+      "note": "Note",
+      "transfer": "Transfer",
+      "updateValue": "Update value",
+      "explainer": "Things in your silo sit outside your spendable cash. Revaluing this never changes \"free to spend.\" Only a transfer does."
+    },
+    "update": {
+      "newValue": "New value",
+      "noChange": "No change",
+      "deltaVs": "{{sign}}{{value}} vs. last value",
+      "explainer": "This doesn't move any cash. Updating a silo never changes your \"free to spend.\"",
+      "save": "Save new value",
+      "successFlash": "{{name}} updated to {{value}}"
+    }
+  },
+  "addSheet": {
+    "title": "Add",
+    "askKind": "What kind of money movement?",
+    "kinds": {
+      "expense": {
+        "title": "Expense",
+        "sub": "Money consumed. Groceries, dinner, a one-off bill."
+      },
+      "income": {
+        "title": "Income",
+        "sub": "Money received. Bonus, gift, refund, or a one-off payday."
+      },
+      "transfer": {
+        "title": "Transfer",
+        "sub": "Money preserved. In or out of a silo."
+      },
+      "asset": {
+        "title": "Silo",
+        "sub": "Savings, property, investment. Store it outside your spendable."
+      },
+      "bill": {
+        "title": "Conta",
+        "sub": "Recurring bill that comes every month."
+      }
+    },
+    "expense": {
+      "amount": "Amount spent",
+      "name": "What was it for",
+      "namePlaceholder": "Groceries, dinner…",
+      "paidFrom": "Paid from",
+      "whoPaid": "Who paid",
+      "submit": "Log expense",
+      "successFlash": "Expense logged"
+    },
+    "transfer": {
+      "amount": "Amount",
+      "swapHint": "Swap direction",
+      "cashAccount": "Cash account",
+      "silo": "Silo",
+      "from": "From",
+      "to": "To",
+      "fromCash": "Cash",
+      "toSilo": "Silo",
+      "explainerToSilo": "This {{value}} leaves free-to-spend. {{name}}'s value goes up by the same amount.",
+      "explainerFromSilo": "This {{value}} comes back to free-to-spend. {{name}}'s value goes down by the same amount.",
+      "submit": "Confirm transfer",
+      "successFlashToSilo": "{{value}} moved to {{name}}",
+      "successFlashFromSilo": "{{value}} pulled from {{name}}"
+    },
+    "income": {
+      "amount": "Amount received",
+      "source": "Source",
+      "sourcePlaceholder": "Bonus, gift, refund…",
+      "whoReceived": "Who received it",
+      "depositedTo": "Deposited into",
+      "submit": "Log income",
+      "successFlash": "Income logged"
+    },
+    "newBill": {
+      "name": "Name",
+      "namePlaceholder": "Electric, gym, school lunch…",
+      "amount": "Amount",
+      "variableLabel": "Variable amount",
+      "estimatePlaceholder": "Estimate (optional)",
+      "dueDate": "Due date",
+      "repeatsMonthly": "Repeats every month",
+      "endsAtToggle": "Fixed number of installments",
+      "installments": "How many installments?",
+      "installmentsPlaceholder": "E.g. 12",
+      "assignee": "Assigned to",
+      "submit": "Add obligation",
+      "successFlash": "Obligation added"
+    }
+  },
+  "allowance": {
+    "thisWeek": "This week",
+    "remaining": "Remaining",
+    "of": "of",
+    "logSpend": "Atualizar",
+    "spent": "{{value}} SPENT",
+    "youSet": "YOU SET",
+    "weekDots": [
+      "M",
+      "T",
+      "W",
+      "T",
+      "F",
+      "S",
+      "S"
+    ],
+    "sheet": {
+      "title": "This week",
+      "remainingHeading": "Remaining",
+      "fromWeekly": "OF {{value}} WEEKLY · {{spent}} SPENT",
+      "suggested": "Suggested",
+      "youSetLabel": "You set",
+      "auto": "AUTO",
+      "custom": "OVERRIDE",
+      "nextIn": "Next money in",
+      "spentThisWeek": "Spent this week",
+      "nothingLogged": "Nothing logged yet.",
+      "log": "Log {{value}}",
+      "saveBudget": "Save",
+      "useSuggested": "Use suggested",
+      "logSpendBtn": "Log spend",
+      "adjustBtn": "Adjust budget",
+      "amountSpent": "Amount spent",
+      "whatWasItFor": "What was it for",
+      "placeholder": "Coffee, gas, takeout…",
+      "paidFrom": "Paid from",
+      "counts": "Counts against your weekly allowance and pushes into household activity.",
+      "yourWeekly": "Your weekly allowance",
+      "preset": {
+        "conservative": "CONSERVE",
+        "moderate": "MODERATE",
+        "suggested": "SUGGESTED"
+      },
+      "calc": "{{free}} ÷ {{days}} DAYS",
+      "perWeek": "PER WEEK",
+      "logFlash": "{{value}} logged",
+      "updatedFlash": "Weekly allowance updated",
+      "resetFlash": "Back to suggested"
+    }
+  },
+  "lar": {
+    "tabLabel": "Account",
+    "eyebrow": "Household",
+    "members": "Members",
+    "pendingOne": "{{count}} pending",
+    "pendingMany": "{{count}} pending",
+    "settled": "{{count}} bills · all settled",
+    "invite": "Invite a member",
+    "setup": "Setup",
+    "setupItems": {
+      "categories": "Categories",
+      "labels": "Labels",
+      "accounts": "Bank accounts"
+    },
+    "recentActivity": "Recent activity",
+    "verbs": {
+      "expense": "spent on",
+      "income": "received",
+      "transfer-in": "moved",
+      "transfer-out": "pulled",
+      "asset-update": "revalued",
+      "bill-payment": "paid"
+    }
+  },
+  "member": {
+    "monthlyIncome": "Monthly income",
+    "receivedThisYear": "Received this year",
+    "recurringIncome": "Recurring income",
+    "billsAssigned": "Bills assigned",
+    "pendingMany": "{{count}} pending bills",
+    "pendingOne": "{{count}} pending bill",
+    "settled": "All caught up",
+    "emptyIncomes": "No recurring income for {{name}} yet. Tap + Add to set up a salary or regular payment.",
+    "emptyBills": "{{name}} doesn't have any bills assigned yet.",
+    "scheduleMonthly": "Every {{day}}",
+    "scheduleSplit": "{{d1}} and {{d2}} of every month",
+    "scheduleBiweekly": "Every two weeks"
+  },
+  "setup": {
+    "categories": {
+      "eyebrow": "Setup · Household",
+      "title": "Categories",
+      "subtitle": "For grouping bills, expenses, and silo items. Stays yours — Milio never analyzes them.",
+      "newBtn": "New category",
+      "usage": "{{n}} uses",
+      "editTitle": "Edit category",
+      "newTitle": "New category",
+      "name": "Name",
+      "namePlaceholder": "Groceries, kids, utilities…",
+      "dotColor": "Dot color",
+      "addedFlash": "Category added",
+      "updatedFlash": "Category updated",
+      "removedFlash": "Category removed"
+    },
+    "labels": {
+      "eyebrow": "Setup · Household",
+      "title": "Labels",
+      "subtitle": "Lightweight tags you can stack on anything. A bill can have many.",
+      "newBtn": "New label",
+      "editTitle": "Edit label",
+      "newTitle": "New label",
+      "namePlaceholder": "Auto-pay, vacation, tax-deductible…",
+      "addedFlash": "Label added",
+      "updatedFlash": "Label updated",
+      "removedFlash": "Label removed"
+    },
+    "accounts": {
+      "eyebrow": "Setup · Household",
+      "title": "Bank accounts",
+      "subtitle": "Where you pay from. Milio doesn't connect to your bank — it just remembers which one you used.",
+      "newBtn": "New bank account",
+      "editTitle": "Edit account",
+      "newTitle": "New bank account",
+      "namePlaceholder": "Chase checking, Wells joint…",
+      "last4": "Last 4 digits",
+      "owner": "Owner",
+      "addedFlash": "Account added",
+      "updatedFlash": "Account updated",
+      "removedFlash": "Account removed"
+    }
+  },
+  "errors": {
+    "generic": "Something went wrong. Try again.",
+    "network": "No connection. Check your internet.",
+    "invalidEmail": "Invalid email.",
+    "invalidCode": "Invalid code.",
+    "invalidDate": "Invalid date.",
+    "amountZero": "Amount has to be greater than zero.",
+    "nameRequired": "Add a name."
+  }
+}

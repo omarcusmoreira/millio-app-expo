@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-label="milio">
+  
+  <rect x="0.5" y="0.5" width="99" height="99" rx="22" ry="22" fill="#FBFBFA" stroke="#EAEAE8" stroke-width="1"></rect>
+
+  
+  <text x="50" y="50" font-family="Fraunces, &#39;GT Super&#39;, &#39;Tiempos&#39;, Georgia, serif" font-size="74" font-weight="400" letter-spacing="-0.02em" text-anchor="middle" dominant-baseline="central">
+    <tspan fill="#1A1815">m</tspan><tspan fill="#C26B4D" dx="-2">.</tspan>
+  </text>
+</svg>
