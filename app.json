@@ -34,6 +34,13 @@
       "expo-router",
       "expo-font",
       "expo-localization"
-    ]
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "c06a3231-8be1-4e06-bacf-2c506eae5ac6"
+      }
+    },
+    "owner": "omarcusmoreira"
   }
 }
