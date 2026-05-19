@@ -3,7 +3,9 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import type { Bill } from '../../src/domain/entities';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { colors, font, spacing } from '../../src/ui/tokens';
+import { useColors } from '../../src/ui/theme';
+import { font, spacing } from '../../src/ui/tokens';
+import type { Colors } from '../../src/ui/tokens';
 import { MemberAvatar, Money } from '../../src/ui/primitives';
 import { useHouseholdStore } from '../../src/store/household';
 import {
@@ -38,6 +40,8 @@ function formatBRL(value: number): string {
 
 export default function HomeScreen() {
   const { t } = useTranslation();
+  const colors = useColors();
+  const styles = makeStyles(colors);
   const household = useHouseholdStore((s) => s.household);
   const today = useHouseholdStore((s) => s.today);
   const updateBill = useHouseholdStore((s) => s.updateBill);
@@ -186,7 +190,7 @@ export default function HomeScreen() {
 
 // ─── Styles ───────────────────────────────────────────────────────────────────
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: Colors) => StyleSheet.create({
   safe: {
     flex: 1,
     backgroundColor: colors.background.page,

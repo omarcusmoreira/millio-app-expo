@@ -19,7 +19,9 @@ import { SwipeableIncomeItem } from '../../src/ui/components/SwipeableIncomeItem
 import { NewBillSheet } from '../../src/ui/components/NewBillSheet';
 import { NewIncomeSheet } from '../../src/ui/components/NewIncomeSheet';
 import { ConfirmModal } from '../../src/ui/components/ConfirmModal';
-import { colors, font, radius, spacing } from '../../src/ui/tokens';
+import { useColors } from '../../src/ui/theme';
+import { font, radius, spacing } from '../../src/ui/tokens';
+import type { Colors } from '../../src/ui/tokens';
 import type { Bill, Member, Transaction } from '../../src/domain/entities';
 
 function formatDate(iso: string): string {
@@ -35,6 +37,8 @@ interface MemberPanelProps {
 
 function MemberPanel({ member }: MemberPanelProps) {
   const { t } = useTranslation();
+  const colors = useColors();
+  const styles = makeStyles(colors);
 
   const household       = useHouseholdStore((s) => s.household);
   const today           = useHouseholdStore((s) => s.today);
@@ -304,6 +308,8 @@ function MemberPanel({ member }: MemberPanelProps) {
 
 export default function HouseholdScreen() {
   const { t } = useTranslation();
+  const colors = useColors();
+  const styles = makeStyles(colors);
 
   const household       = useHouseholdStore((s) => s.household);
   const members         = household?.members ?? [];
@@ -390,7 +396,7 @@ export default function HouseholdScreen() {
 
 // ─── Styles ───────────────────────────────────────────────────────────────────
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: Colors) => StyleSheet.create({
   safe: {
     flex: 1,
     backgroundColor: colors.background.page,

@@ -3,12 +3,16 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Settings } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
-import { colors, spacing } from '../tokens';
+import { spacing } from '../tokens';
+import type { Colors } from '../tokens';
+import { useColors } from '../theme';
 import { Brand } from './Brand';
 
 export function AppHeader() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const colors = useColors();
+  const styles = makeStyles(colors);
 
   return (
     <View style={[styles.row, { paddingTop: insets.top + spacing[3] }]}>
@@ -22,7 +26,7 @@ export function AppHeader() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: Colors) => StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'center',

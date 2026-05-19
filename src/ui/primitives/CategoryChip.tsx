@@ -1,7 +1,9 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { Dot } from './Dot';
-import { colors, font, radius, spacing } from '../tokens';
+import { font, radius, spacing } from '../tokens';
+import type { Colors } from '../tokens';
+import { useColors } from '../theme';
 
 interface CategoryChipProps {
   name: string;
@@ -9,6 +11,8 @@ interface CategoryChipProps {
 }
 
 export function CategoryChip({ name, color }: CategoryChipProps) {
+  const colors = useColors();
+  const styles = makeStyles(colors);
   return (
     <View style={[styles.chip, { backgroundColor: color + '1A' }]}>
       <Dot kind={color} size={6} />
@@ -17,7 +21,7 @@ export function CategoryChip({ name, color }: CategoryChipProps) {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: Colors) => StyleSheet.create({
   chip: {
     flexDirection: 'row',
     alignItems: 'center',

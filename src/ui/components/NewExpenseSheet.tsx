@@ -13,7 +13,9 @@ import { useTranslation } from 'react-i18next';
 import { Sheet } from './Sheet';
 import { useHouseholdStore } from '../../store/household';
 import { MemberAvatar } from '../primitives';
-import { colors, font, radius, spacing } from '../tokens';
+import { font, radius, spacing } from '../tokens';
+import type { Colors } from '../tokens';
+import { useColors } from '../theme';
 
 const schema = z.object({
   amount: z.string().refine((v) => parseFloat(v.replace(',', '.')) > 0, 'required'),
@@ -31,6 +33,8 @@ interface Props {
 
 export function NewExpenseSheet({ open, onClose }: Props) {
   const { t } = useTranslation();
+  const colors = useColors();
+  const styles = makeStyles(colors);
   const household = useHouseholdStore((s) => s.household);
   const today = useHouseholdStore((s) => s.today);
   const addTransaction = useHouseholdStore((s) => s.addTransaction);
@@ -179,6 +183,8 @@ export function NewExpenseSheet({ open, onClose }: Props) {
 }
 
 function Field({ label, error, children }: { label: string; error?: string | undefined; children: React.ReactNode }) {
+  const colors = useColors();
+  const styles = makeStyles(colors);
   return (
     <View style={styles.field}>
       <Text style={styles.fieldLabel}>{label}</Text>
@@ -188,7 +194,7 @@ function Field({ label, error, children }: { label: string; error?: string | und
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: Colors) => StyleSheet.create({
   field: { gap: spacing[3] },
   fieldLabel: {
     fontFamily: font.family.mono,

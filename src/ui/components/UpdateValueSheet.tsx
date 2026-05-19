@@ -8,7 +8,9 @@ import { Sheet } from './Sheet';
 import { Money } from '../primitives';
 import { useHouseholdStore } from '../../store/household';
 import type { Silo } from '../../domain/entities';
-import { colors, font, radius, spacing } from '../tokens';
+import { font, radius, spacing } from '../tokens';
+import type { Colors } from '../tokens';
+import { useColors } from '../theme';
 
 const schema = z.object({
   newValue: z.string().regex(/^\d+([,\.]\d{0,2})?$/, 'required'),
@@ -24,6 +26,8 @@ interface UpdateValueSheetProps {
 
 export function UpdateValueSheet({ silo, open, onClose }: UpdateValueSheetProps) {
   const { t } = useTranslation();
+  const colors = useColors();
+  const styles = makeStyles(colors);
   const updateValue = useHouseholdStore((s) => s.updateSiloValue);
 
   const { control, handleSubmit, reset, watch, formState: { errors } } = useForm<FormValues>({
@@ -103,7 +107,7 @@ export function UpdateValueSheet({ silo, open, onClose }: UpdateValueSheetProps)
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: Colors) => StyleSheet.create({
   field: { gap: spacing[2] },
   fieldLabel: {
     fontFamily: font.family.mono,

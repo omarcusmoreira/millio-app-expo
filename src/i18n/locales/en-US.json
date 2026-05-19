@@ -508,6 +508,12 @@
       "inviteSub": "Share an invite code or link",
       "join": "Join a household",
       "joinSub": "Use a code someone sent you"
+    },
+    "appearance": {
+      "heading": "Appearance",
+      "system": "System default",
+      "light": "Light",
+      "dark": "Dark"
     }
   },
   "errors": {

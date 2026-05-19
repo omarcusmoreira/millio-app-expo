@@ -13,7 +13,9 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { animation, colors, font, radius, spacing } from '../tokens';
+import { animation, font, radius, spacing } from '../tokens';
+import type { Colors } from '../tokens';
+import { useColors } from '../theme';
 
 interface SheetProps {
   open: boolean;
@@ -35,6 +37,8 @@ export function Sheet({
   dismissible = true,
 }: SheetProps) {
   const insets = useSafeAreaInsets();
+  const colors = useColors();
+  const styles = makeStyles(colors);
   const translateY = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
   const backdropOpacity = useRef(new Animated.Value(0)).current;
 
@@ -146,7 +150,7 @@ export function Sheet({
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: Colors) => StyleSheet.create({
   backdrop: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: '#000',

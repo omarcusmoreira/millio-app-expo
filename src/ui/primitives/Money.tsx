@@ -1,7 +1,9 @@
 import React from 'react';
 import { StyleSheet, Text } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { colors, font } from '../tokens';
+import { font } from '../tokens';
+import type { Colors } from '../tokens';
+import { useColors } from '../theme';
 
 type MoneyVariant = 'hero' | 'hero-small' | 'kpi' | 'inline' | 'monoLine';
 
@@ -40,12 +42,14 @@ export function Money({
 }: MoneyProps) {
   const { i18n } = useTranslation();
   const locale = i18n.language;
+  const colors = useColors();
 
   const showCents = cents ?? (variant === 'inline' || variant === 'monoLine');
   const formatted = formatMoney(value, locale, showCents);
   const sign = showSign && value > 0 ? '+' : value < 0 ? '−' : '';
   const display = sign + formatted;
 
+  const VARIANT_STYLES = makeVariantStyles(colors);
   const variantStyle = VARIANT_STYLES[variant];
   const resolvedColor = color ?? variantStyle.color;
 
@@ -64,7 +68,8 @@ export function Money({
   );
 }
 
-const VARIANT_STYLES = {
+function makeVariantStyles(colors: Colors) {
+  return {
   hero: {
     color: colors.brand.terracotta,
     text: {
@@ -119,7 +124,8 @@ const VARIANT_STYLES = {
       fontVariantNumeric: 'tabular-nums' as const,
     },
   },
-};
+  };
+}
 
 const styles = StyleSheet.create({
   italic: {

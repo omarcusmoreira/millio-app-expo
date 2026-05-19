@@ -20,7 +20,9 @@ import { SwipeableIncomeItem } from '../../src/ui/components/SwipeableIncomeItem
 import { NewBillSheet } from '../../src/ui/components/NewBillSheet';
 import { NewIncomeSheet } from '../../src/ui/components/NewIncomeSheet';
 import { ConfirmModal } from '../../src/ui/components/ConfirmModal';
-import { colors, font, radius, spacing } from '../../src/ui/tokens';
+import { font, radius, spacing } from '../../src/ui/tokens';
+import type { Colors } from '../../src/ui/tokens';
+import { useColors } from '../../src/ui/theme';
 import type { Bill, Transaction } from '../../src/domain/entities';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -35,6 +37,8 @@ function formatDate(iso: string): string {
 export default function MemberScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
+  const colors = useColors();
+  const styles = makeStyles(colors);
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
 
@@ -367,7 +371,7 @@ export default function MemberScreen() {
 
 // ─── Styles ───────────────────────────────────────────────────────────────────
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: Colors) => StyleSheet.create({
   safe: {
     flex: 1,
     backgroundColor: colors.background.page,

@@ -3,7 +3,9 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import type { Silo } from '../../domain/entities';
 import { Money } from '../primitives';
-import { colors, font, spacing } from '../tokens';
+import { font, spacing } from '../tokens';
+import type { Colors } from '../tokens';
+import { useColors } from '../theme';
 
 interface SiloRowProps {
   silo: Silo;
@@ -13,6 +15,8 @@ interface SiloRowProps {
 
 export function SiloRow({ silo, today, onPress }: SiloRowProps) {
   const { t } = useTranslation();
+  const colors = useColors();
+  const styles = makeStyles(colors);
   const agoLabel = getAgoLabel(silo.updatedAt, today, t);
 
   const pct = silo.goalAmount != null && silo.goalAmount > 0
@@ -71,7 +75,7 @@ function getAgoLabel(
   return t('silos.ago.years', { n: Math.round(diffDays / 365) });
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: Colors) => StyleSheet.create({
   row: {
     paddingVertical: spacing[5],
     paddingHorizontal: spacing[7],

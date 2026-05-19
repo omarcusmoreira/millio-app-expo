@@ -14,8 +14,9 @@ import { Sheet } from './Sheet';
 import { useHouseholdStore } from '../../store/household';
 import type { Transaction } from '../../domain/entities';
 import { MemberAvatar } from '../primitives';
-import { colors, spacing } from '../tokens';
-import { DueDatePicker, Field, shared } from './sheetShared';
+import { spacing } from '../tokens';
+import { useColors } from '../theme';
+import { DueDatePicker, Field, useShared } from './sheetShared';
 
 function addMonths(isoDate: string, months: number): string {
   const [y, m, d] = isoDate.split('-').map(Number) as [number, number, number];
@@ -54,6 +55,8 @@ interface Props {
 
 export function NewIncomeSheet({ open, onClose, defaultMemberId, editTransaction }: Props) {
   const { t } = useTranslation();
+  const colors = useColors();
+  const shared = useShared();
   const household = useHouseholdStore((s) => s.household);
   const today = useHouseholdStore((s) => s.today);
   const addTransaction = useHouseholdStore((s) => s.addTransaction);

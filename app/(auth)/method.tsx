@@ -3,12 +3,16 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { colors, font, radius, spacing } from '../../src/ui/tokens';
+import { useColors } from '../../src/ui/theme';
+import { font, radius, spacing } from '../../src/ui/tokens';
+import type { Colors } from '../../src/ui/tokens';
 import { useAuthStore } from '../../src/store/auth';
 import { OnboardingNav } from '../../src/ui/primitives/OnboardingNav';
 
 export default function AuthMethodScreen() {
   const { t } = useTranslation();
+  const colors = useColors();
+  const styles = makeStyles(colors);
   const { intent, setAuthMethod } = useAuthStore();
   const isSignup = intent === 'create';
 
@@ -79,7 +83,7 @@ export default function AuthMethodScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: Colors) => StyleSheet.create({
   safe: {
     flex: 1,
     backgroundColor: colors.background.page,

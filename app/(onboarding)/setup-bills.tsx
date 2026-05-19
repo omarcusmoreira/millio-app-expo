@@ -3,7 +3,9 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { colors, font, radius, spacing } from '../../src/ui/tokens';
+import { font, radius, spacing } from '../../src/ui/tokens';
+import type { Colors } from '../../src/ui/tokens';
+import { useColors } from '../../src/ui/theme';
 import { OnboardingNav } from '../../src/ui/primitives/OnboardingNav';
 
 const MOCK_BILLS = [
@@ -15,6 +17,8 @@ const MOCK_BILLS = [
 
 export default function SetupBillsScreen() {
   const { t } = useTranslation();
+  const colors = useColors();
+  const styles = makeStyles(colors);
 
   return (
     <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
@@ -75,7 +79,7 @@ export default function SetupBillsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: Colors) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background.page },
   container: {
     flex: 1,

@@ -13,13 +13,17 @@ import { TransferSheet } from '../../src/ui/components/TransferSheet';
 import { NewSiloSheet } from '../../src/ui/components/NewSiloSheet';
 import { ConfirmModal } from '../../src/ui/components/ConfirmModal';
 import { Money } from '../../src/ui/primitives';
-import { colors, font, spacing } from '../../src/ui/tokens';
+import { font, spacing } from '../../src/ui/tokens';
+import type { Colors } from '../../src/ui/tokens';
+import { useColors } from '../../src/ui/theme';
 import type { Silo } from '../../src/domain/entities';
 
 type ActiveSheet = 'update' | 'transfer' | 'edit' | null;
 
 export default function SilosScreen() {
   const { t } = useTranslation();
+  const colors = useColors();
+  const styles = makeStyles(colors);
   const household = useHouseholdStore((s) => s.household);
   const today = useHouseholdStore((s) => s.today);
   const deleteSilo = useHouseholdStore((s) => s.deleteSilo);
@@ -108,7 +112,7 @@ export default function SilosScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: Colors) => StyleSheet.create({
   safe: {
     flex: 1,
     backgroundColor: colors.background.page,

@@ -9,7 +9,8 @@ import {
 import { Check, RotateCcw, Trash2 } from 'lucide-react-native';
 import type { Bill, Category, Member } from '../../domain/entities';
 import { BillItem } from './BillItem';
-import { colors } from '../tokens';
+import type { Colors } from '../tokens';
+import { useColors } from '../theme';
 
 // Snap-to-reveal threshold — button becomes visible at this point
 const REVEAL = 80;
@@ -35,6 +36,8 @@ export function SwipeableBillItem({
   onPay,
   onDelete,
 }: SwipeableBillItemProps) {
+  const colors = useColors();
+  const styles = makeStyles(colors);
   const translateX = useRef(new Animated.Value(0)).current;
   const openSide = useRef<'pay' | 'delete' | null>(null);
   const baseX = useRef(0);
@@ -164,7 +167,7 @@ export function SwipeableBillItem({
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: Colors) => StyleSheet.create({
   container: {
     overflow: 'hidden',
   },

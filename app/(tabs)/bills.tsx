@@ -14,7 +14,9 @@ import { SwipeableBillItem } from '../../src/ui/components/SwipeableBillItem';
 import { NewBillSheet } from '../../src/ui/components/NewBillSheet';
 import { ConfirmModal } from '../../src/ui/components/ConfirmModal';
 import { Money } from '../../src/ui/primitives';
-import { colors, font, radius, spacing } from '../../src/ui/tokens';
+import { useColors } from '../../src/ui/theme';
+import { font, radius, spacing } from '../../src/ui/tokens';
+import type { Colors } from '../../src/ui/tokens';
 import type { Bill } from '../../src/domain/entities';
 
 type Filter = 'all' | 'upcoming' | 'paid';
@@ -31,6 +33,8 @@ function monthNavLabel(year: number, month: number, locale: string): string {
 
 export default function BillsScreen() {
   const { t, i18n } = useTranslation();
+  const colors = useColors();
+  const styles = makeStyles(colors);
   const household = useHouseholdStore((s) => s.household);
   const today = useHouseholdStore((s) => s.today);
   const updateBill = useHouseholdStore((s) => s.updateBill);
@@ -182,7 +186,7 @@ export default function BillsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: Colors) => StyleSheet.create({
   safe: {
     flex: 1,
     backgroundColor: colors.background.page,

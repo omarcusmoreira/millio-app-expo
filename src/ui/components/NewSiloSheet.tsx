@@ -7,8 +7,10 @@ import { useTranslation } from 'react-i18next';
 import { Sheet } from './Sheet';
 import { useHouseholdStore } from '../../store/household';
 import type { Silo } from '../../domain/entities';
-import { colors, font, radius, spacing } from '../tokens';
-import { shared } from './sheetShared';
+import { font, radius, spacing } from '../tokens';
+import type { Colors } from '../tokens';
+import { useColors } from '../theme';
+import { useShared } from './sheetShared';
 
 const schema = z.object({
   name: z.string().min(1),
@@ -28,6 +30,9 @@ interface NewSiloSheetProps {
 
 export function NewSiloSheet({ open, onClose, silo }: NewSiloSheetProps) {
   const { t } = useTranslation();
+  const colors = useColors();
+  const styles = makeStyles(colors);
+  const shared = useShared();
   const addSilo    = useHouseholdStore((s) => s.addSilo);
   const updateSilo = useHouseholdStore((s) => s.updateSilo);
   const household  = useHouseholdStore((s) => s.household);
@@ -200,6 +205,8 @@ function Field({
   error?: string | undefined;
   children: React.ReactNode;
 }) {
+  const colors = useColors();
+  const styles = makeStyles(colors);
   return (
     <View style={styles.field}>
       <Text style={styles.fieldLabel}>{label}</Text>
@@ -209,7 +216,7 @@ function Field({
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: Colors) => StyleSheet.create({
   field: { gap: spacing[2] },
   fieldLabel: {
     fontFamily: font.family.mono,

@@ -11,7 +11,9 @@ import {
   effectiveAllowance as computeEffectiveAllowance,
   weeklySpent as computeWeeklySpent,
 } from '../../domain/selectors';
-import { colors, font, radius, spacing } from '../tokens';
+import { font, radius, spacing } from '../tokens';
+import type { Colors } from '../tokens';
+import { useColors } from '../theme';
 import { NewExpenseSheet } from './NewExpenseSheet';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -33,6 +35,8 @@ function formatBRL(value: number): string {
 
 export function AllowanceCard() {
   const { t } = useTranslation();
+  const colors = useColors();
+  const styles = makeStyles(colors);
   const [sheetOpen, setSheetOpen] = useState(false);
 
   const household = useHouseholdStore((s) => s.household);
@@ -108,7 +112,7 @@ export function AllowanceCard() {
 
 // ─── Styles ────────────────────────────────────────────────────────────────────
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: Colors) => StyleSheet.create({
   card: {
     backgroundColor: colors.background.surface,
     borderRadius: radius.large,

@@ -11,7 +11,9 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { colors, font, radius, spacing } from '../../src/ui/tokens';
+import { font, radius, spacing } from '../../src/ui/tokens';
+import type { Colors } from '../../src/ui/tokens';
+import { useColors } from '../../src/ui/theme';
 import { Avatar } from '../../src/ui/primitives';
 import { useHouseholdStore } from '../../src/store/household';
 import { buildFreshHousehold } from '../../src/domain/factory';
@@ -19,6 +21,8 @@ import { OnboardingNav } from '../../src/ui/primitives/OnboardingNav';
 
 export default function OnboardingIdentityScreen() {
   const { t } = useTranslation();
+  const colors = useColors();
+  const styles = makeStyles(colors);
   const setHousehold = useHouseholdStore((s) => s.setHousehold);
   const [name, setName] = useState('');
 
@@ -84,7 +88,7 @@ export default function OnboardingIdentityScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: Colors) => StyleSheet.create({
   safe: {
     flex: 1,
     backgroundColor: colors.background.page,

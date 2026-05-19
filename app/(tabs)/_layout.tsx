@@ -3,7 +3,9 @@ import React, { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
-import { colors, font, spacing } from '../../src/ui/tokens';
+import { useColors } from '../../src/ui/theme';
+import { font, spacing } from '../../src/ui/tokens';
+import type { Colors } from '../../src/ui/tokens';
 import {
   HomeIcon,
   BillsIcon,
@@ -15,6 +17,8 @@ import { AppHeader } from '../../src/ui/primitives/AppHeader';
 import { AddSheet } from '../../src/ui/components/AddSheet';
 
 function AddTabButton({ onPress }: { onPress?: () => void }) {
+  const colors = useColors();
+  const styles = makeStyles(colors);
   return (
     <View style={styles.addBtnWrapper}>
       <Pressable
@@ -30,6 +34,8 @@ function AddTabButton({ onPress }: { onPress?: () => void }) {
 
 export default function TabsLayout() {
   const { t } = useTranslation();
+  const colors = useColors();
+  const styles = makeStyles(colors);
   const insets = useSafeAreaInsets();
   const [addOpen, setAddOpen] = useState(false);
 
@@ -101,7 +107,7 @@ export default function TabsLayout() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: Colors) => StyleSheet.create({
   root: {
     flex: 1,
     backgroundColor: colors.background.page,

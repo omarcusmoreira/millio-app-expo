@@ -127,3 +127,16 @@ export const strokeWidth = {
 } as const;
 
 export type ColorToken = 'terracotta' | 'olive' | 'grey';
+
+export type Colors = {
+  background: { page: string; surface: string; surfaceSoft: string; keyboardChip: string };
+  border: { default: string; emphasis: string; divider: string };
+  ink: { 1: string; 2: string; 3: string; 4: string };
+  brand: { terracotta: string; terracottaPressed: string; terracottaSoft: string };
+  semantic: { olive: string; warmGrey: string };
+  avatar: {
+    terracotta: { bg: string; fg: string };
+    olive: { bg: string; fg: string };
+    grey: { bg: string; fg: string };
+  };
+};

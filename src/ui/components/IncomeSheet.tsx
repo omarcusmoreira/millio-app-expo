@@ -13,8 +13,9 @@ import { useTranslation } from 'react-i18next';
 import { Sheet } from './Sheet';
 import { useHouseholdStore } from '../../store/household';
 import type { Income } from '../../domain/entities';
-import { colors, font, spacing } from '../tokens';
-import { Field, shared } from './sheetShared';
+import { font, spacing } from '../tokens';
+import { useColors } from '../theme';
+import { Field, useShared } from './sheetShared';
 
 // ─── Schema ───────────────────────────────────────────────────────────────────
 
@@ -54,6 +55,8 @@ interface IncomeSheetProps {
 
 export function IncomeSheet({ open, onClose, memberId, income }: IncomeSheetProps) {
   const { t } = useTranslation();
+  const colors = useColors();
+  const shared = useShared();
   const addIncome = useHouseholdStore((s) => s.addIncome);
   const updateIncome = useHouseholdStore((s) => s.updateIncome);
 

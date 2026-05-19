@@ -17,8 +17,10 @@ import { useAuthStore } from '../src/store/auth';
 import { useHouseholdStore } from '../src/store/household';
 import { Avatar, CategoryChip } from '../src/ui/primitives';
 import { ConfirmModal } from '../src/ui/components/ConfirmModal';
-import { colors, font, radius, spacing } from '../src/ui/tokens';
-import type { ColorToken } from '../src/ui/tokens';
+import { font, radius, spacing } from '../src/ui/tokens';
+import type { ColorToken, Colors } from '../src/ui/tokens';
+import { useColors, useThemeStore } from '../src/ui/theme';
+import type { ThemePreference } from '../src/ui/theme';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -43,10 +45,14 @@ const AVATAR_COLORS = [
 // ─── Small shared components ──────────────────────────────────────────────────
 
 function SectionHeader({ label }: { label: string }) {
+  const colors = useColors();
+  const styles = makeStyles(colors);
   return <Text style={styles.sectionHeader}>{label.toUpperCase()}</Text>;
 }
 
 function EmptyRow({ text }: { text: string }) {
+  const colors = useColors();
+  const styles = makeStyles(colors);
   return (
     <View style={styles.emptyRow}>
       <Text style={styles.emptyText}>{text}</Text>
@@ -76,6 +82,8 @@ function InlineForm({
   memberColor, onMemberColorChange,
   saveLabel, onSave, onCancel, cancelLabel, autoFocus = true,
 }: InlineFormProps) {
+  const colors = useColors();
+  const styles = makeStyles(colors);
   return (
     <View style={styles.addForm}>
       <TextInput
@@ -135,6 +143,12 @@ function InlineForm({
 export default function SettingsScreen() {
   const { t } = useTranslation();
   const router = useRouter();
+  const colors = useColors();
+  const styles = makeStyles(colors);
+
+  // ── Appearance ──
+  const preference    = useThemeStore((s) => s.preference);
+  const setPreference = useThemeStore((s) => s.setPreference);
 
   // ── Auth / profile ──
   const authName        = useAuthStore((s) => s.name);
@@ -622,6 +636,27 @@ export default function SettingsScreen() {
               )}
             </View>
           </View>
+          {/* ── Appearance ── */}
+          <View style={styles.section}>
+            <SectionHeader label={t('settings.appearance.heading')} />
+            <View style={styles.card}>
+              {(['system', 'light', 'dark'] as ThemePreference[]).map((option, idx) => (
+                <View key={option}>
+                  {idx > 0 && <View style={styles.separatorFull} />}
+                  <Pressable
+                    style={({ pressed }) => [styles.themeRow, pressed && styles.rowPressed]}
+                    onPress={() => setPreference(option)}
+                    accessibilityRole="radio"
+                    accessibilityState={{ checked: preference === option }}
+                  >
+                    <Text style={styles.themeLabel}>{t(`settings.appearance.${option}`)}</Text>
+                    <View style={[styles.themeRadio, preference === option && styles.themeRadioSelected]} />
+                  </Pressable>
+                </View>
+              ))}
+            </View>
+          </View>
+
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -630,7 +665,7 @@ export default function SettingsScreen() {
 
 // ─── Styles ───────────────────────────────────────────────────────────────────
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: Colors) => StyleSheet.create({
   safe: {
     flex: 1,
     backgroundColor: colors.background.page,
@@ -863,5 +898,31 @@ const styles = StyleSheet.create({
     fontFamily: font.family.sans,
     fontSize: font.size.small,
     color: colors.ink[3],
+  },
+  // Appearance
+  themeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: spacing[5],
+    paddingVertical: spacing[5],
+    gap: spacing[4],
+  },
+  themeLabel: {
+    flex: 1,
+    fontFamily: font.family.sans,
+    fontSize: font.size.body,
+    color: colors.ink[1],
+  },
+  themeRadio: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: colors.border.emphasis,
+    backgroundColor: 'transparent',
+  },
+  themeRadioSelected: {
+    borderColor: colors.brand.terracotta,
+    backgroundColor: colors.brand.terracotta,
   },
 });

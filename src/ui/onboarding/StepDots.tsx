@@ -1,6 +1,7 @@
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
-import { colors } from '../tokens';
+import type { Colors } from '../tokens';
+import { useColors } from '../theme';
 
 interface StepDotsProps {
   total: number;
@@ -8,6 +9,8 @@ interface StepDotsProps {
 }
 
 export function StepDots({ total, current }: StepDotsProps) {
+  const colors = useColors();
+  const styles = makeStyles(colors);
   return (
     <View style={styles.row}>
       {Array.from({ length: total }, (_, i) => {
@@ -23,7 +26,7 @@ export function StepDots({ total, current }: StepDotsProps) {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: Colors) => StyleSheet.create({
   row: {
     flexDirection: 'row',
     gap: 4,

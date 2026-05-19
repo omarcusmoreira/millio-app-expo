@@ -12,7 +12,9 @@ import { z } from 'zod';
 import { useTranslation } from 'react-i18next';
 import { Sheet } from './Sheet';
 import { useHouseholdStore } from '../../store/household';
-import { colors, font, radius, spacing } from '../tokens';
+import { font, radius, spacing } from '../tokens';
+import type { Colors } from '../tokens';
+import { useColors } from '../theme';
 
 // ─── Schema ───────────────────────────────────────────────────────────────────
 
@@ -40,6 +42,8 @@ interface LogSpendSheetProps {
 
 export function LogSpendSheet({ open, onClose }: LogSpendSheetProps) {
   const { t } = useTranslation();
+  const colors = useColors();
+  const styles = makeStyles(colors);
   const logAllowanceSpend = useHouseholdStore((s) => s.logAllowanceSpend);
 
   const {
@@ -136,6 +140,8 @@ function Field({
   error?: string | undefined;
   children: React.ReactNode;
 }) {
+  const colors = useColors();
+  const styles = makeStyles(colors);
   return (
     <View style={styles.field}>
       <Text style={styles.fieldLabel}>{label}</Text>
@@ -147,7 +153,7 @@ function Field({
 
 // ─── Styles ────────────────────────────────────────────────────────────────────
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: Colors) => StyleSheet.create({
   field: {
     gap: spacing[2],
   },

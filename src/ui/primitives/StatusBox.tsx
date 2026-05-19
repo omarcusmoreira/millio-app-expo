@@ -1,7 +1,9 @@
 import React from 'react';
 import { View } from 'react-native';
 import { Check } from 'lucide-react-native';
-import { colors, statusBox } from '../tokens';
+import { statusBox } from '../tokens';
+import type { Colors } from '../tokens';
+import { useColors } from '../theme';
 
 interface StatusBoxProps {
   status: 'paid' | 'upcoming' | 'overdue';
@@ -9,6 +11,8 @@ interface StatusBoxProps {
 }
 
 export function StatusBox({ status, size = statusBox.size }: StatusBoxProps) {
+  const colors = useColors();
+  const STATUS_STYLES = makeStatusStyles(colors);
   const style = STATUS_STYLES[status];
 
   return (
@@ -31,20 +35,22 @@ export function StatusBox({ status, size = statusBox.size }: StatusBoxProps) {
   );
 }
 
-const STATUS_STYLES = {
-  paid: {
-    bg: colors.semantic.olive,
-    borderWidth: 0,
-    borderColor: undefined as string | undefined,
-  },
-  upcoming: {
-    bg: 'transparent',
-    borderWidth: 1,
-    borderColor: colors.ink[4],
-  },
-  overdue: {
-    bg: 'transparent',
-    borderWidth: 1,
-    borderColor: colors.brand.terracotta,
-  },
-} as const;
+function makeStatusStyles(colors: Colors) {
+  return {
+    paid: {
+      bg: colors.semantic.olive,
+      borderWidth: 0 as number,
+      borderColor: undefined as string | undefined,
+    },
+    upcoming: {
+      bg: 'transparent',
+      borderWidth: 1 as number,
+      borderColor: colors.ink[4],
+    },
+    overdue: {
+      bg: 'transparent',
+      borderWidth: 1 as number,
+      borderColor: colors.brand.terracotta,
+    },
+  };
+}

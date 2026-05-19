@@ -1,6 +1,8 @@
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { colors, font, spacing } from '../tokens';
+import { font, spacing } from '../tokens';
+import type { Colors } from '../tokens';
+import { useColors } from '../theme';
 import { Brand } from './Brand';
 import { StepDots } from '../onboarding/StepDots';
 
@@ -19,6 +21,8 @@ export function OnboardingNav({
   totalSteps,
   stepLabel,
 }: OnboardingNavProps) {
+  const colors = useColors();
+  const styles = makeStyles(colors);
   const hasSteps =
     step !== undefined && totalSteps !== undefined;
 
@@ -49,7 +53,7 @@ export function OnboardingNav({
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: Colors) => StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'center',

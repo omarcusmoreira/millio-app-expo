@@ -7,7 +7,9 @@ import { NewExpenseSheet } from './NewExpenseSheet';
 import { NewIncomeSheet } from './NewIncomeSheet';
 import { NewBillSheet } from './NewBillSheet';
 import { NewSiloSheet } from './NewSiloSheet';
-import { colors, font, radius, spacing } from '../tokens';
+import { font, radius, spacing } from '../tokens';
+import type { Colors } from '../tokens';
+import { useColors } from '../theme';
 
 type ActionKind = 'expense' | 'income' | 'bill' | 'silo' | null;
 
@@ -18,6 +20,8 @@ interface AddSheetProps {
 
 export function AddSheet({ open, onClose }: AddSheetProps) {
   const { t } = useTranslation();
+  const colors = useColors();
+  const styles = makeStyles(colors);
   const [action, setAction] = useState<ActionKind>(null);
 
   function handleClose() {
@@ -65,6 +69,8 @@ export function AddSheet({ open, onClose }: AddSheetProps) {
 }
 
 function KindCard({ icon, title, sub, onPress }: { icon: React.ReactNode; title: string; sub: string; onPress: () => void }) {
+  const colors = useColors();
+  const styles = makeStyles(colors);
   return (
     <Pressable
       style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}
@@ -81,7 +87,7 @@ function KindCard({ icon, title, sub, onPress }: { icon: React.ReactNode; title:
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: Colors) => StyleSheet.create({
   grid: {
     gap: spacing[3],
     paddingBottom: spacing[4],

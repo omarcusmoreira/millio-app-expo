@@ -9,7 +9,9 @@ import {
 } from 'react-native';
 import { Pencil, Trash2 } from 'lucide-react-native';
 import { CategoryChip, Money } from '../primitives';
-import { colors, font, spacing } from '../tokens';
+import { font, spacing } from '../tokens';
+import type { Colors } from '../tokens';
+import { useColors } from '../theme';
 import type { CashAccount, Category, Transaction } from '../../domain/entities';
 
 const REVEAL  = 72;
@@ -29,6 +31,8 @@ interface Props {
 }
 
 export function SwipeableIncomeItem({ transaction, accounts = [], categories = [], onEdit, onDelete }: Props) {
+  const colors = useColors();
+  const styles = makeStyles(colors);
   const translateX = useRef(new Animated.Value(0)).current;
   const openSide   = useRef<'edit' | 'delete' | null>(null);
   const baseX      = useRef(0);
@@ -153,7 +157,7 @@ export function SwipeableIncomeItem({ transaction, accounts = [], categories = [
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: Colors) => StyleSheet.create({
   container: { overflow: 'hidden' },
   content:   { backgroundColor: colors.background.surface },
   action: {

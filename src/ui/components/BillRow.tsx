@@ -4,7 +4,9 @@ import { useTranslation } from 'react-i18next';
 import type { Bill, Category, Member } from '../../domain/entities';
 import { billStatus } from '../../domain/selectors';
 import { Dot, MemberAvatar, Money, StatusBox } from '../primitives';
-import { colors, font, spacing } from '../tokens';
+import { font, spacing } from '../tokens';
+import type { Colors } from '../tokens';
+import { useColors } from '../theme';
 
 interface BillRowProps {
   bill: Bill;
@@ -24,6 +26,8 @@ export function BillRow({
   onPress,
 }: BillRowProps) {
   const { t } = useTranslation();
+  const colors = useColors();
+  const styles = makeStyles(colors);
   const status = billStatus(bill, today);
   const isPaid = status === 'paid';
   const isOverdue = status === 'overdue';
@@ -110,7 +114,7 @@ function daysBetween(a: string, b: string): number {
   return Math.round((db.getTime() - da.getTime()) / (1000 * 60 * 60 * 24));
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: Colors) => StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'flex-start',

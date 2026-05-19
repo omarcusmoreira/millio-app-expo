@@ -3,10 +3,14 @@ import { KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, TextInput,
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { colors, font, radius, spacing } from '../../src/ui/tokens';
+import { useColors } from '../../src/ui/theme';
+import { font, radius, spacing } from '../../src/ui/tokens';
+import type { Colors } from '../../src/ui/tokens';
 
 export default function AuthMagicScreen() {
   const { t } = useTranslation();
+  const colors = useColors();
+  const styles = makeStyles(colors);
   const { email } = useLocalSearchParams<{ email: string }>();
   const [code, setCode] = useState('');
   const confirmed = code.length === 6;
@@ -54,7 +58,7 @@ export default function AuthMagicScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: Colors) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background.page },
   kav: { flex: 1 },
   container: { flex: 1, paddingHorizontal: spacing[8], paddingTop: spacing[8], paddingBottom: spacing[6], justifyContent: 'space-between' },

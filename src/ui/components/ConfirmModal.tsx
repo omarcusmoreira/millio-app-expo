@@ -8,7 +8,9 @@ import {
   Text,
   View,
 } from 'react-native';
-import { animation, colors, font, radius, spacing } from '../tokens';
+import { animation, font, radius, spacing } from '../tokens';
+import type { Colors } from '../tokens';
+import { useColors } from '../theme';
 
 interface ConfirmModalProps {
   visible: boolean;
@@ -29,6 +31,8 @@ export function ConfirmModal({
   onConfirm,
   onCancel,
 }: ConfirmModalProps) {
+  const colors = useColors();
+  const styles = makeStyles(colors);
   const backdropOpacity = useRef(new Animated.Value(0)).current;
   const cardScale = useRef(new Animated.Value(0.92)).current;
   const cardOpacity = useRef(new Animated.Value(0)).current;
@@ -127,7 +131,7 @@ export function ConfirmModal({
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: Colors) => StyleSheet.create({
   backdrop: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: '#000',

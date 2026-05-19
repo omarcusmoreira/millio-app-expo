@@ -9,7 +9,9 @@ import {
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { ChevronLeft, ChevronRight } from 'lucide-react-native';
-import { colors, font, radius, spacing } from '../tokens';
+import { font, radius, spacing } from '../tokens';
+import type { Colors } from '../tokens';
+import { useColors } from '../theme';
 
 // ─── Field wrapper ────────────────────────────────────────────────────────────
 
@@ -24,6 +26,8 @@ export function Field({
   error?: string | undefined;
   children: React.ReactNode;
 }) {
+  const colors = useColors();
+  const shared = makeShared(colors);
   return (
     <View style={shared.field}>
       <Text style={shared.fieldLabel}>{label}</Text>
@@ -44,6 +48,8 @@ export function DueDatePicker({
   onChange: (v: string) => void;
 }) {
   const { i18n } = useTranslation();
+  const colors = useColors();
+  const dp = makeDp(colors);
   const locale = i18n.language;
 
   const parts = value.split('-').map(Number);
@@ -133,119 +139,128 @@ export function DueDatePicker({
 
 // ─── Shared styles ────────────────────────────────────────────────────────────
 
-export const shared = StyleSheet.create({
-  field: { gap: spacing[2] },
-  fieldLabel: {
-    fontFamily: font.family.mono,
-    fontSize: font.size.mono,
-    color: colors.ink[3],
-    textTransform: 'uppercase',
-    letterSpacing: font.letterSpacing.eyebrow,
-  },
-  fieldHint: {
-    fontFamily: font.family.sans,
-    fontSize: font.size.small,
-    color: colors.ink[4],
-  },
-  fieldError: {
-    fontFamily: font.family.sans,
-    fontSize: font.size.small,
-    color: colors.brand.terracotta,
-  },
-  input: {
-    height: 48,
-    borderWidth: 1,
-    borderColor: colors.border.emphasis,
-    borderRadius: radius.medium,
-    paddingHorizontal: spacing[5],
-    fontFamily: font.family.sans,
-    fontSize: font.size.body,
-    color: colors.ink[1],
-    backgroundColor: colors.background.surface,
-  },
-  inputError: { borderColor: colors.brand.terracotta },
-  toggleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: spacing[2],
-  },
-  toggleLabel: {
-    fontFamily: font.family.sans,
-    fontSize: font.size.body,
-    color: colors.ink[1],
-    flex: 1,
-  },
-  chipWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing[2] },
-  selectChip: {
-    paddingHorizontal: spacing[4],
-    paddingVertical: spacing[2],
-    borderRadius: radius.pill,
-    borderWidth: 1,
-    borderColor: 'transparent',
-  },
-  selectChipActive: { borderColor: colors.ink[1] },
-  selectChipLabel: {
-    fontFamily: font.family.sans,
-    fontSize: font.size.small,
-    color: colors.ink[3],
-    fontWeight: font.weight.medium,
-  },
-  selectChipLabelActive: { color: colors.ink[1] },
-  assigneeChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing[3],
-    paddingHorizontal: spacing[4],
-    paddingVertical: spacing[2],
-    borderRadius: radius.pill,
-    borderWidth: 1,
-    borderColor: 'transparent',
-  },
-  submitBtn: {
-    backgroundColor: colors.brand.terracotta,
-    borderRadius: radius.medium,
-    paddingVertical: spacing[5],
-    alignItems: 'center',
-  },
-  submitBtnPressed: { opacity: 0.8 },
-  submitLabel: {
-    fontFamily: font.family.sans,
-    fontSize: font.size.body,
-    fontWeight: font.weight.medium,
-    color: colors.background.surface,
-  },
-});
+function makeShared(colors: Colors) {
+  return StyleSheet.create({
+    field: { gap: spacing[2] },
+    fieldLabel: {
+      fontFamily: font.family.mono,
+      fontSize: font.size.mono,
+      color: colors.ink[3],
+      textTransform: 'uppercase',
+      letterSpacing: font.letterSpacing.eyebrow,
+    },
+    fieldHint: {
+      fontFamily: font.family.sans,
+      fontSize: font.size.small,
+      color: colors.ink[4],
+    },
+    fieldError: {
+      fontFamily: font.family.sans,
+      fontSize: font.size.small,
+      color: colors.brand.terracotta,
+    },
+    input: {
+      height: 48,
+      borderWidth: 1,
+      borderColor: colors.border.emphasis,
+      borderRadius: radius.medium,
+      paddingHorizontal: spacing[5],
+      fontFamily: font.family.sans,
+      fontSize: font.size.body,
+      color: colors.ink[1],
+      backgroundColor: colors.background.surface,
+    },
+    inputError: { borderColor: colors.brand.terracotta },
+    toggleRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingVertical: spacing[2],
+    },
+    toggleLabel: {
+      fontFamily: font.family.sans,
+      fontSize: font.size.body,
+      color: colors.ink[1],
+      flex: 1,
+    },
+    chipWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing[2] },
+    selectChip: {
+      paddingHorizontal: spacing[4],
+      paddingVertical: spacing[2],
+      borderRadius: radius.pill,
+      borderWidth: 1,
+      borderColor: 'transparent',
+    },
+    selectChipActive: { borderColor: colors.ink[1] },
+    selectChipLabel: {
+      fontFamily: font.family.sans,
+      fontSize: font.size.small,
+      color: colors.ink[3],
+      fontWeight: font.weight.medium,
+    },
+    selectChipLabelActive: { color: colors.ink[1] },
+    assigneeChip: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing[3],
+      paddingHorizontal: spacing[4],
+      paddingVertical: spacing[2],
+      borderRadius: radius.pill,
+      borderWidth: 1,
+      borderColor: 'transparent',
+    },
+    submitBtn: {
+      backgroundColor: colors.brand.terracotta,
+      borderRadius: radius.medium,
+      paddingVertical: spacing[5],
+      alignItems: 'center',
+    },
+    submitBtnPressed: { opacity: 0.8 },
+    submitLabel: {
+      fontFamily: font.family.sans,
+      fontSize: font.size.body,
+      fontWeight: font.weight.medium,
+      color: colors.background.surface,
+    },
+  });
+}
 
-const dp = StyleSheet.create({
-  container: { gap: spacing[3] },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: spacing[2],
-  },
-  monthLabel: {
-    fontFamily: font.family.mono,
-    fontSize: font.size.mono,
-    color: colors.ink[2],
-    letterSpacing: font.letterSpacing.eyebrow,
-  },
-  dayRow: { gap: spacing[2], paddingVertical: spacing[1] },
-  dayChip: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.background.surfaceSoft,
-  },
-  dayChipActive: { backgroundColor: colors.brand.terracotta },
-  dayLabel: {
-    fontFamily: font.family.sans,
-    fontSize: font.size.small,
-    color: colors.ink[2],
-    fontWeight: font.weight.medium,
-  },
-  dayLabelActive: { color: colors.background.surface },
-});
+export function useShared() {
+  const colors = useColors();
+  return makeShared(colors);
+}
+
+function makeDp(colors: Colors) {
+  return StyleSheet.create({
+    container: { gap: spacing[3] },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingHorizontal: spacing[2],
+    },
+    monthLabel: {
+      fontFamily: font.family.mono,
+      fontSize: font.size.mono,
+      color: colors.ink[2],
+      letterSpacing: font.letterSpacing.eyebrow,
+    },
+    dayRow: { gap: spacing[2], paddingVertical: spacing[1] },
+    dayChip: {
+      width: 34,
+      height: 34,
+      borderRadius: 17,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colors.background.surfaceSoft,
+    },
+    dayChipActive: { backgroundColor: colors.brand.terracotta },
+    dayLabel: {
+      fontFamily: font.family.sans,
+      fontSize: font.size.small,
+      color: colors.ink[2],
+      fontWeight: font.weight.medium,
+    },
+    dayLabelActive: { color: colors.background.surface },
+  });
+}

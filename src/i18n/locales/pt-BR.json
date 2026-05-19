@@ -508,6 +508,12 @@
       "inviteSub": "Compartilhe um código ou link de convite",
       "join": "Ingressar em um lar",
       "joinSub": "Use o código que alguém te enviou"
+    },
+    "appearance": {
+      "heading": "Aparência",
+      "system": "Padrão do sistema",
+      "light": "Claro",
+      "dark": "Escuro"
     }
   },
   "errors": {

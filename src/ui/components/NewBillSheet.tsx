@@ -15,8 +15,10 @@ import { Sheet } from './Sheet';
 import { useHouseholdStore } from '../../store/household';
 import type { Bill } from '../../domain/entities';
 import { Dot, MemberAvatar } from '../primitives';
-import { colors, font, radius, spacing } from '../tokens';
-import { DueDatePicker, Field, shared } from './sheetShared';
+import { font, radius, spacing } from '../tokens';
+import type { Colors } from '../tokens';
+import { useColors } from '../theme';
+import { DueDatePicker, Field, useShared } from './sheetShared';
 
 // ─── Schema ───────────────────────────────────────────────────────────────────
 
@@ -59,6 +61,9 @@ interface NewBillSheetProps {
 
 export function NewBillSheet({ open, onClose, bill }: NewBillSheetProps) {
   const { t } = useTranslation();
+  const colors = useColors();
+  const styles = makeStyles(colors);
+  const shared = useShared();
   const household = useHouseholdStore((s) => s.household);
   const today = useHouseholdStore((s) => s.today);
   const addBill = useHouseholdStore((s) => s.addBill);
@@ -379,7 +384,7 @@ export function NewBillSheet({ open, onClose, bill }: NewBillSheetProps) {
 
 // ─── Bill-specific styles ──────────────────────────────────────────────────────
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: Colors) => StyleSheet.create({
   catChip: {
     flexDirection: 'row',
     alignItems: 'center',

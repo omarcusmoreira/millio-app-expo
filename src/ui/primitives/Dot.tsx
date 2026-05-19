@@ -1,13 +1,15 @@
 import React from 'react';
 import { View } from 'react-native';
-import { colors } from '../tokens';
-import type { ColorToken } from '../tokens';
+import type { ColorToken, Colors } from '../tokens';
+import { useColors } from '../theme';
 
-const COLOR_TOKEN_MAP: Record<ColorToken, string> = {
-  terracotta: colors.brand.terracotta,
-  olive: colors.semantic.olive,
-  grey: colors.semantic.warmGrey,
-};
+function makeColorTokenMap(colors: Colors): Record<ColorToken, string> {
+  return {
+    terracotta: colors.brand.terracotta,
+    olive: colors.semantic.olive,
+    grey: colors.semantic.warmGrey,
+  };
+}
 
 interface DotProps {
   kind: ColorToken | string;
@@ -16,6 +18,8 @@ interface DotProps {
 }
 
 export function Dot({ kind, size = 8, ring = false }: DotProps) {
+  const colors = useColors();
+  const COLOR_TOKEN_MAP = makeColorTokenMap(colors);
   const resolved =
     kind in COLOR_TOKEN_MAP
       ? COLOR_TOKEN_MAP[kind as ColorToken]

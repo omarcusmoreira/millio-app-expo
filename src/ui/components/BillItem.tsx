@@ -4,7 +4,9 @@ import { useTranslation } from 'react-i18next';
 import type { Bill, Category, Member } from '../../domain/entities';
 import { billStatus } from '../../domain/selectors';
 import { CategoryChip, MemberAvatar, Money } from '../primitives';
-import { colors, font, spacing } from '../tokens';
+import { font, spacing } from '../tokens';
+import type { Colors } from '../tokens';
+import { useColors } from '../theme';
 
 interface BillItemProps {
   bill: Bill;
@@ -16,6 +18,8 @@ interface BillItemProps {
 
 export function BillItem({ bill, categories, today, assignee, onPress }: BillItemProps) {
   const { t } = useTranslation();
+  const colors = useColors();
+  const styles = makeStyles(colors);
   const status = billStatus(bill, today);
   const isPaid = status === 'paid';
   const isOverdue = status === 'overdue';
@@ -94,7 +98,7 @@ function daysBetween(a: string, b: string): number {
 
 const AVATAR_SM = 24;
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: Colors) => StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'center',

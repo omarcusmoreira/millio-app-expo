@@ -7,7 +7,9 @@ import { useTranslation } from 'react-i18next';
 import { Sheet } from './Sheet';
 import { useHouseholdStore } from '../../store/household';
 import type { Silo } from '../../domain/entities';
-import { colors, font, radius, spacing } from '../tokens';
+import { font, radius, spacing } from '../tokens';
+import type { Colors } from '../tokens';
+import { useColors } from '../theme';
 
 const schema = z.object({
   amount: z.string().regex(/^\d+([,\.]\d{0,2})?$/, 'required'),
@@ -24,6 +26,8 @@ interface TransferSheetProps {
 
 export function TransferSheet({ silo, open, onClose }: TransferSheetProps) {
   const { t } = useTranslation();
+  const colors = useColors();
+  const styles = makeStyles(colors);
   const household = useHouseholdStore((s) => s.household);
   const transferTo = useHouseholdStore((s) => s.transferToSilo);
   const transferFrom = useHouseholdStore((s) => s.transferFromSilo);
@@ -159,7 +163,7 @@ export function TransferSheet({ silo, open, onClose }: TransferSheetProps) {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: Colors) => StyleSheet.create({
   dirRow: { flexDirection: 'column', gap: spacing[2] },
   dirChip: {
     paddingHorizontal: spacing[5],

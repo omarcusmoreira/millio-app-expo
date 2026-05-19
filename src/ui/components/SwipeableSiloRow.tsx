@@ -9,7 +9,8 @@ import {
 import { Plus, Trash2 } from 'lucide-react-native';
 import type { Silo } from '../../domain/entities';
 import { SiloRow } from './SiloRow';
-import { colors } from '../tokens';
+import type { Colors } from '../tokens';
+import { useColors } from '../theme';
 
 const REVEAL = 80;
 const TRIGGER = 200;
@@ -29,6 +30,8 @@ export function SwipeableSiloRow({
   onContribute,
   onDelete,
 }: SwipeableSiloRowProps) {
+  const colors = useColors();
+  const styles = makeStyles(colors);
   const translateX = useRef(new Animated.Value(0)).current;
   const openSide = useRef<'contribute' | 'delete' | null>(null);
   const baseX = useRef(0);
@@ -149,7 +152,7 @@ export function SwipeableSiloRow({
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: Colors) => StyleSheet.create({
   container: {
     overflow: 'hidden',
   },

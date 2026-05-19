@@ -1,7 +1,8 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { avatarSize, colors } from '../tokens';
+import { avatarSize } from '../tokens';
 import type { ColorToken } from '../tokens';
+import { useColors } from '../theme';
 
 interface AvatarProps {
   initial: string;
@@ -17,6 +18,7 @@ const SIZE_MAP = {
 } as const;
 
 export function Avatar({ initial, color, size = 'md', bgHex }: AvatarProps) {
+  const colors = useColors();
   const dim = SIZE_MAP[size];
   const palette = colors.avatar[color];
   const bg = bgHex ?? palette.bg;
