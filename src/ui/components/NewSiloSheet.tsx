@@ -6,7 +6,7 @@ import { z } from 'zod';
 import { useTranslation } from 'react-i18next';
 import { Sheet } from './Sheet';
 import { useHouseholdStore } from '../../store/household';
-import type { Silo, SiloKind } from '../../domain/entities';
+import type { Silo } from '../../domain/entities';
 import { colors, font, radius, spacing } from '../tokens';
 import { shared } from './sheetShared';
 
@@ -14,14 +14,11 @@ const schema = z.object({
   name: z.string().min(1),
   value: z.string(),
   goalAmount: z.string(),
-  kind: z.enum(['property', 'savings', 'equity', 'vehicle', 'other'] as const),
   note: z.string(),
-  labelIds: z.array(z.string()),
+  labelId: z.string(),
 });
 
 type FormValues = z.infer<typeof schema>;
-
-const KINDS: SiloKind[] = ['savings', 'property', 'equity', 'vehicle', 'other'];
 
 interface NewSiloSheetProps {
   open: boolean;
@@ -40,7 +37,7 @@ export function NewSiloSheet({ open, onClose, silo }: NewSiloSheetProps) {
 
   const { control, handleSubmit, reset, formState: { errors } } = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: { name: '', value: '', goalAmount: '', kind: 'savings', note: '', labelIds: [] },
+    defaultValues: { name: '', value: '', goalAmount: '', note: '', labelId: '' },
   });
 
   useEffect(() => {
@@ -49,12 +46,11 @@ export function NewSiloSheet({ open, onClose, silo }: NewSiloSheetProps) {
         name: silo.name,
         value: String(silo.value),
         goalAmount: silo.goalAmount != null ? String(silo.goalAmount) : '',
-        kind: silo.kind,
         note: silo.note,
-        labelIds: silo.labelIds,
+        labelId: silo.labelIds[0] ?? '',
       });
     } else if (!open) {
-      reset({ name: '', value: '', goalAmount: '', kind: 'savings', note: '', labelIds: [] });
+      reset({ name: '', value: '', goalAmount: '', note: '', labelId: '' });
     }
   }, [open, silo]);
 
@@ -66,9 +62,8 @@ export function NewSiloSheet({ open, onClose, silo }: NewSiloSheetProps) {
       name: values.name.trim(),
       value: isNaN(value) ? 0 : value,
       goalAmount: goalAmount !== null && !isNaN(goalAmount) ? goalAmount : null,
-      kind: values.kind,
       note: values.note.trim(),
-      labelIds: values.labelIds,
+      labelIds: values.labelId ? [values.labelId] : [],
     };
 
     if (isEditing && silo) {
@@ -149,28 +144,6 @@ export function NewSiloSheet({ open, onClose, silo }: NewSiloSheetProps) {
         />
       </Field>
 
-      <Field label={t('silos.detail.type')}>
-        <Controller
-          control={control}
-          name="kind"
-          render={({ field: { value, onChange } }) => (
-            <View style={styles.chipWrap}>
-              {KINDS.map((k) => (
-                <Pressable
-                  key={k}
-                  style={[styles.chip, value === k && styles.chipActive]}
-                  onPress={() => onChange(k)}
-                >
-                  <Text style={[styles.chipLabel, value === k && styles.chipLabelActive]}>
-                    {k}
-                  </Text>
-                </Pressable>
-              ))}
-            </View>
-          )}
-        />
-      </Field>
-
       <Field label={t('silos.detail.note')}>
         <Controller
           control={control}
@@ -192,18 +165,16 @@ export function NewSiloSheet({ open, onClose, silo }: NewSiloSheetProps) {
         <Field label={t('lar.setupItems.labels')}>
           <Controller
             control={control}
-            name="labelIds"
+            name="labelId"
             render={({ field: { value, onChange } }) => (
               <View style={shared.chipWrap}>
                 {labels.map((label) => {
-                  const selected = value.includes(label.id);
+                  const selected = value === label.id;
                   return (
                     <Pressable
                       key={label.id}
                       style={[shared.selectChip, selected && shared.selectChipActive]}
-                      onPress={() =>
-                        onChange(selected ? value.filter((id) => id !== label.id) : [...value, label.id])
-                      }
+                      onPress={() => onChange(selected ? '' : label.id)}
                     >
                       <Text style={[shared.selectChipLabel, selected && shared.selectChipLabelActive]}>
                         {label.name}
@@ -264,22 +235,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background.surface,
   },
   inputError: { borderColor: colors.brand.terracotta },
-  chipWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing[2] },
-  chip: {
-    paddingHorizontal: spacing[4],
-    paddingVertical: spacing[2],
-    borderRadius: radius.pill,
-    borderWidth: 1,
-    borderColor: colors.border.default,
-  },
-  chipActive: { backgroundColor: colors.ink[1], borderColor: colors.ink[1] },
-  chipLabel: {
-    fontFamily: font.family.sans,
-    fontSize: font.size.small,
-    color: colors.ink[2],
-    fontWeight: font.weight.medium,
-  },
-  chipLabelActive: { color: colors.background.surface },
   submitBtn: {
     backgroundColor: colors.brand.terracotta,
     borderRadius: radius.medium,

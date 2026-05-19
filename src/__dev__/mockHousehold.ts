@@ -92,11 +92,11 @@ export const MOCK_HOUSEHOLD: Household = {
   ],
 
   silos: [
-    { id: 'as1', name: 'Apartamento',           value: 642000, kind: 'property', note: 'Estimativa de mercado',   goalAmount: null,  labelIds: [],       updatedAt: '2026-03-12', createdAt: '2025-01-01' },
-    { id: 'as2', name: 'Reserva de emergência', value: 18400,  kind: 'savings',  note: 'CDB Itaú',                goalAmount: 30000, labelIds: ['l4'],   updatedAt: '2026-05-09', createdAt: '2025-01-01' },
-    { id: 'as3', name: 'Ações Tesla',           value: 9120,   kind: 'equity',   note: '38 cotas',                goalAmount: null,  labelIds: [],       updatedAt: '2026-04-28', createdAt: '2025-01-01' },
-    { id: 'as4', name: 'Honda Civic',           value: 11500,  kind: 'vehicle',  note: '2019, 47 mil km',         goalAmount: null,  labelIds: [],       updatedAt: '2026-02-04', createdAt: '2025-01-01' },
-    { id: 'as5', name: 'Faculdade da Sofia',    value: 14200,  kind: 'savings',  note: 'Plano educacional',       goalAmount: 50000, labelIds: ['l4'],   updatedAt: '2026-05-01', createdAt: '2025-01-01' },
+    { id: 'as1', name: 'Apartamento',           value: 642000, note: 'Estimativa de mercado',   goalAmount: null,  labelIds: [],       updatedAt: '2026-03-12', createdAt: '2025-01-01' },
+    { id: 'as2', name: 'Reserva de emergência', value: 18400,  note: 'CDB Itaú',                goalAmount: 30000, labelIds: ['l4'],   updatedAt: '2026-05-09', createdAt: '2025-01-01' },
+    { id: 'as3', name: 'Ações Tesla',           value: 9120,   note: '38 cotas',                goalAmount: null,  labelIds: [],       updatedAt: '2026-04-28', createdAt: '2025-01-01' },
+    { id: 'as4', name: 'Honda Civic',           value: 11500,  note: '2019, 47 mil km',         goalAmount: null,  labelIds: [],       updatedAt: '2026-02-04', createdAt: '2025-01-01' },
+    { id: 'as5', name: 'Faculdade da Sofia',    value: 14200,  note: 'Plano educacional',       goalAmount: 50000, labelIds: ['l4'],   updatedAt: '2026-05-01', createdAt: '2025-01-01' },
   ],
 
   incomes: [

@@ -65,9 +65,9 @@ const silo = (value = 1000): Silo => ({
   id: ID('silo1'),
   name: 'Emergency Fund',
   value,
-  kind: 'savings',
   note: '',
   goalAmount: null,
+  labelIds: [],
   updatedAt: '2026-01-01',
   createdAt: '2026-01-01',
 });

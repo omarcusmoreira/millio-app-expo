@@ -83,7 +83,7 @@ Given<World>('bill {string} is assigned to {string}', (w, billName, memberName) 
 Given<World>('a silo {string} with {string}', (w, name, amount) => {
   w.household.silos.push({
     id: ulid(), name, value: parseMoney(amount),
-    kind: 'other', note: '', goalAmount: null,
+    note: '', goalAmount: null,
     updatedAt: w.today, createdAt: w.today,
   });
 });

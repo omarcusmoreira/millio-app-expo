@@ -30,9 +30,8 @@ export function SiloRow({ silo, today, onPress }: SiloRowProps) {
         <Money value={silo.value} variant="inline" color={colors.ink[1]} />
       </View>
 
-      {/* Row 2: kind + ago */}
+      {/* Row 2: ago */}
       <View style={styles.metaLine}>
-        <Text style={styles.kindTag}>{silo.kind.toUpperCase()}</Text>
         <Text style={styles.agoLabel}>{agoLabel}</Text>
       </View>
 
@@ -98,13 +97,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-  },
-  kindTag: {
-    fontFamily: font.family.mono,
-    fontSize: font.size.mono,
-    color: colors.ink[3],
-    textTransform: 'uppercase',
-    letterSpacing: font.letterSpacing.eyebrow,
   },
   agoLabel: {
     fontFamily: font.family.mono,

@@ -55,13 +55,10 @@ export interface Bill {
   updatedAt: string;
 }
 
-export type SiloKind = 'property' | 'savings' | 'equity' | 'vehicle' | 'other';
-
 export interface Silo {
   id: ID;
   name: string;
   value: number;
-  kind: SiloKind;
   note: string;
   goalAmount: number | null;
   labelIds: ID[];
