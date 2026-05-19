@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import type { Bill } from '../../src/domain/entities';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { colors, font, spacing } from '../../src/ui/tokens';
-import { Avatar, Money } from '../../src/ui/primitives';
+import { MemberAvatar, Money } from '../../src/ui/primitives';
 import { useHouseholdStore } from '../../src/store/household';
 import {
   cashOnHand,
@@ -14,7 +15,9 @@ import {
   totalPending,
 } from '../../src/domain/selectors';
 import { AllowanceCard } from '../../src/ui/components/AllowanceCard';
-import { BillItem } from '../../src/ui/components/BillItem';
+import { SwipeableBillItem } from '../../src/ui/components/SwipeableBillItem';
+import { NewBillSheet } from '../../src/ui/components/NewBillSheet';
+import { ConfirmModal } from '../../src/ui/components/ConfirmModal';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -31,27 +34,20 @@ function formatBRL(value: number): string {
   }
 }
 
-function formatDateShort(isoDate: string): string {
-  try {
-    const [, month, day] = isoDate.split('-').map(Number);
-    const MONTHS = ['JAN', 'FEV', 'MAR', 'ABR', 'MAI', 'JUN',
-                    'JUL', 'AGO', 'SET', 'OUT', 'NOV', 'DEZ'];
-    return `${day} DE ${MONTHS[month - 1]}`;
-  } catch {
-    return isoDate;
-  }
-}
-
 // ─── Main screen ──────────────────────────────────────────────────────────────
 
 export default function HomeScreen() {
   const { t } = useTranslation();
   const household = useHouseholdStore((s) => s.household);
   const today = useHouseholdStore((s) => s.today);
+  const updateBill = useHouseholdStore((s) => s.updateBill);
+  const deleteBill = useHouseholdStore((s) => s.deleteBill);
+  const [editBill, setEditBill] = useState<Bill | null>(null);
+  const [deletingBill, setDeletingBill] = useState<Bill | null>(null);
 
   const freeValue = household ? computeFreeToSpend(household, today) : 0;
   const overdrawn = household
-    ? totalPending(household) > cashOnHand(household)
+    ? totalPending(household) > cashOnHand(household, today)
     : false;
 
   // Next paycheck info
@@ -84,6 +80,23 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.safe}>
+      <NewBillSheet
+        open={editBill !== null}
+        bill={editBill ?? undefined}
+        onClose={() => setEditBill(null)}
+      />
+      <ConfirmModal
+        visible={deletingBill !== null}
+        title={t('addSheet.newBill.deleteBill')}
+        message={t('common.deleteConfirm')}
+        confirmLabel={t('addSheet.newBill.deleteBill')}
+        cancelLabel={t('common.cancel')}
+        onConfirm={() => {
+          if (deletingBill) deleteBill(deletingBill.id);
+          setDeletingBill(null);
+        }}
+        onCancel={() => setDeletingBill(null)}
+      />
       <ScrollView
         style={styles.scroll}
         contentContainerStyle={styles.container}
@@ -97,27 +110,12 @@ export default function HomeScreen() {
             variant="hero"
             color={overdrawn ? colors.brand.terracottaPressed : colors.brand.terracotta}
           />
-          {paycheckInfo && daysUntil !== null && (
+          {paycheckInfo && daysUntil !== null && paycheckMember && (
             <View style={styles.paycheckRow}>
               <Text style={styles.paycheckText}>
-                {t('home.nextIn', {
-                  days: daysUntil,
-                  date: formatDateShort(paycheckInfo.date),
-                })}
+                {t('home.paycheckIn', { days: daysUntil })}
               </Text>
-              {paycheckMember && (
-                <>
-                  <Text style={styles.paycheckDot}> · </Text>
-                  <Avatar
-                    initial={paycheckMember.initial}
-                    color={paycheckMember.color}
-                    size="sm"
-                  />
-                  <Text style={styles.paycheckText}>
-                    {' '}{t('home.paycheckOf', { name: paycheckMember.name })}
-                  </Text>
-                </>
-              )}
+              <MemberAvatar member={paycheckMember} size="sm" />
             </View>
           )}
         </View>
@@ -159,11 +157,17 @@ export default function HomeScreen() {
               return (
                 <React.Fragment key={bill.id}>
                   {i > 0 && <View style={styles.rowDivider} />}
-                  <BillItem
+                  <SwipeableBillItem
                     bill={bill}
                     categories={categories}
                     today={today}
                     assignee={assignee}
+                    onEdit={() => setEditBill(bill)}
+                    onPay={() => bill.paidAt
+                      ? updateBill(bill.id, { paidAt: null, paidAmount: null, paidFromAccountId: null })
+                      : updateBill(bill.id, { paidAt: today, paidAmount: bill.amount ?? bill.estimate ?? 0, paidFromAccountId: null })
+                    }
+                    onDelete={() => setDeletingBill(bill)}
                   />
                 </React.Fragment>
               );
@@ -211,7 +215,7 @@ const styles = StyleSheet.create({
   paycheckRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    flexWrap: 'wrap',
+    gap: spacing[2],
     marginTop: spacing[2],
   },
   paycheckText: {
@@ -220,11 +224,6 @@ const styles = StyleSheet.create({
     color: colors.ink[3],
     letterSpacing: font.letterSpacing.eyebrow,
     textTransform: 'uppercase',
-  },
-  paycheckDot: {
-    fontFamily: font.family.mono,
-    fontSize: font.size.mono,
-    color: colors.ink[4],
   },
 
   // Stats

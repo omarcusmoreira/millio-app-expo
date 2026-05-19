@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Pressable,
   Switch,
@@ -12,7 +12,8 @@ import { z } from 'zod';
 import { useTranslation } from 'react-i18next';
 import { Sheet } from './Sheet';
 import { useHouseholdStore } from '../../store/household';
-import { Avatar } from '../primitives';
+import type { Transaction } from '../../domain/entities';
+import { MemberAvatar } from '../primitives';
 import { colors, spacing } from '../tokens';
 import { DueDatePicker, Field, shared } from './sheetShared';
 
@@ -47,13 +48,18 @@ type FormValues = z.infer<typeof schema>;
 interface Props {
   open: boolean;
   onClose: () => void;
+  defaultMemberId?: string | undefined;
+  editTransaction?: Transaction | undefined;
 }
 
-export function NewIncomeSheet({ open, onClose }: Props) {
+export function NewIncomeSheet({ open, onClose, defaultMemberId, editTransaction }: Props) {
   const { t } = useTranslation();
   const household = useHouseholdStore((s) => s.household);
   const today = useHouseholdStore((s) => s.today);
   const addTransaction = useHouseholdStore((s) => s.addTransaction);
+  const updateTransaction = useHouseholdStore((s) => s.updateTransaction);
+
+  const isEditing = !!editTransaction;
 
   const members  = household?.members ?? [];
   const accounts = household?.cashAccounts ?? [];
@@ -76,27 +82,65 @@ export function NewIncomeSheet({ open, onClose }: Props) {
       dueDate: today,
       repeatsMonthly: true,
       installments: null,
-      memberId: members[0]?.id ?? '',
+      memberId: defaultMemberId ?? members[0]?.id ?? '',
       accountId: accounts[0]?.id ?? '',
     },
   });
+
+  useEffect(() => {
+    if (open && editTransaction) {
+      reset({
+        source: editTransaction.name,
+        variable: false,
+        amount: String(editTransaction.amount),
+        dueDate: editTransaction.date,
+        repeatsMonthly: false,
+        installments: null,
+        memberId: editTransaction.byMemberId,
+        accountId: editTransaction.accountId ?? accounts[0]?.id ?? '',
+      });
+    } else if (!open) {
+      reset({
+        source: '',
+        variable: false,
+        amount: '',
+        dueDate: today,
+        repeatsMonthly: true,
+        installments: null,
+        memberId: defaultMemberId ?? members[0]?.id ?? '',
+        accountId: accounts[0]?.id ?? '',
+      });
+      setShowInstallments(false);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, editTransaction]);
 
   const isVariable     = watch('variable');
   const repeatsMonthly = watch('repeatsMonthly');
 
   const onSubmit = (values: FormValues) => {
     const amountRaw = parseFloat(values.amount.replace(',', '.'));
-    addTransaction({
-      kind: 'income',
-      name: values.source.trim(),
-      amount: isNaN(amountRaw) ? 0 : amountRaw,
-      date: values.dueDate,
-      byMemberId: values.memberId,
-      accountId: values.accountId,
-      siloId: null,
-      billId: null,
-      categoryIds: [],
-    });
+    if (isEditing && editTransaction) {
+      updateTransaction(editTransaction.id, {
+        name: values.source.trim(),
+        amount: isNaN(amountRaw) ? 0 : amountRaw,
+        date: values.dueDate,
+        byMemberId: values.memberId,
+        accountId: values.accountId,
+      });
+    } else {
+      addTransaction({
+        kind: 'income',
+        name: values.source.trim(),
+        amount: isNaN(amountRaw) ? 0 : amountRaw,
+        date: values.dueDate,
+        byMemberId: values.memberId,
+        accountId: values.accountId,
+        siloId: null,
+        billId: null,
+        categoryIds: [],
+      });
+    }
     reset();
     setShowInstallments(false);
     onClose();
@@ -106,13 +150,15 @@ export function NewIncomeSheet({ open, onClose }: Props) {
     <Sheet
       open={open}
       onClose={onClose}
-      title={t('addSheet.kinds.income.title')}
+      title={isEditing ? t('addSheet.income.editTitle') : t('addSheet.kinds.income.title')}
       footer={
         <Pressable
           style={({ pressed }) => [shared.submitBtn, pressed && shared.submitBtnPressed]}
           onPress={handleSubmit(onSubmit)}
         >
-          <Text style={shared.submitLabel}>{t('addSheet.income.submit')}</Text>
+          <Text style={shared.submitLabel}>
+            {isEditing ? t('addSheet.income.save') : t('addSheet.income.submit')}
+          </Text>
         </Pressable>
       }
     >
@@ -263,7 +309,7 @@ export function NewIncomeSheet({ open, onClose }: Props) {
                       style={[shared.assigneeChip, selected && shared.selectChipActive]}
                       onPress={() => onChange(m.id)}
                     >
-                      <Avatar initial={m.initial} color={m.color} size="sm" />
+                      <MemberAvatar member={m} size="sm" />
                       <Text style={[shared.selectChipLabel, selected && shared.selectChipLabelActive]}>
                         {m.name}
                       </Text>
@@ -293,7 +339,7 @@ export function NewIncomeSheet({ open, onClose }: Props) {
                       onPress={() => onChange(acc.id)}
                     >
                       <Text style={[shared.selectChipLabel, selected && shared.selectChipLabelActive]}>
-                        {acc.name}{acc.last4 ? ` ···· ${acc.last4}` : ''}
+                        {acc.name}
                       </Text>
                     </Pressable>
                   );

@@ -40,7 +40,7 @@ function addAccount(w: World): string {
   const id = 'acc-itau';
   w.household = {
     ...w.household,
-    cashAccounts: [{ id, name: 'Itaú checking', ownerId: w.household.members[0]?.id ?? 'm1', last4: '0000' }],
+    cashAccounts: [{ id, name: 'Itaú checking', ownerId: w.household.members[0]?.id ?? 'm1' }],
   };
   return id;
 }

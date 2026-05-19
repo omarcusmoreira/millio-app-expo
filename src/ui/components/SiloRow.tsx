@@ -15,43 +15,44 @@ export function SiloRow({ silo, today, onPress }: SiloRowProps) {
   const { t } = useTranslation();
   const agoLabel = getAgoLabel(silo.updatedAt, today, t);
 
+  const pct = silo.goalAmount != null && silo.goalAmount > 0
+    ? Math.min(100, Math.round((silo.value / silo.goalAmount) * 100))
+    : null;
+
   return (
     <Pressable
       style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}
       onPress={onPress}
     >
-      <View style={styles.content}>
-        <View style={styles.topLine}>
-          <Text style={styles.name} numberOfLines={1}>
-            {silo.name}
-          </Text>
-          <Money value={silo.value} variant="inline" color={colors.ink[1]} />
-        </View>
-
-        <View style={styles.metaLine}>
-          <Text style={styles.metaText}>
-            {silo.kind.toUpperCase()}
-          </Text>
-          {silo.note ? (
-            <>
-              <Text style={styles.metaSep}>·</Text>
-              <Text style={styles.metaText} numberOfLines={1}>
-                {silo.note}
-              </Text>
-            </>
-          ) : null}
-          {silo.goalAmount != null && (
-            <>
-              <Text style={styles.metaSep}>·</Text>
-              <Text style={styles.metaText}>
-                {t('common.goal')} <Money value={silo.goalAmount} variant="inline" color={colors.ink[3]} />
-              </Text>
-            </>
-          )}
-          <Text style={[styles.metaText, styles.agoText]}>{agoLabel}</Text>
-          <Text style={styles.chevron}>›</Text>
-        </View>
+      {/* Row 1: name + value */}
+      <View style={styles.topLine}>
+        <Text style={styles.name} numberOfLines={1}>{silo.name}</Text>
+        <Money value={silo.value} variant="inline" color={colors.ink[1]} />
       </View>
+
+      {/* Row 2: kind + ago */}
+      <View style={styles.metaLine}>
+        <Text style={styles.kindTag}>{silo.kind.toUpperCase()}</Text>
+        <Text style={styles.agoLabel}>{agoLabel}</Text>
+      </View>
+
+      {/* Row 3: note (optional) */}
+      {silo.note ? (
+        <Text style={styles.note} numberOfLines={1}>{silo.note}</Text>
+      ) : null}
+
+      {/* Row 4: goal progress (optional) */}
+      {silo.goalAmount != null && pct !== null && (
+        <View style={styles.goalSection}>
+          <View style={styles.progressTrack}>
+            <View style={[styles.progressFill, { width: `${pct}%` }]} />
+          </View>
+          <View style={styles.goalCaption}>
+            <Text style={styles.goalPct}>{pct}%</Text>
+            <Money value={silo.goalAmount} variant="monoLine" color={colors.ink[4]} />
+          </View>
+        </View>
+      )}
     </Pressable>
   );
 }
@@ -73,15 +74,13 @@ function getAgoLabel(
 
 const styles = StyleSheet.create({
   row: {
-    paddingVertical: spacing[6],
+    paddingVertical: spacing[5],
     paddingHorizontal: spacing[7],
     backgroundColor: colors.background.surface,
+    gap: spacing[1],
   },
   rowPressed: {
     backgroundColor: colors.background.surfaceSoft,
-  },
-  content: {
-    gap: spacing[1],
   },
   topLine: {
     flexDirection: 'row',
@@ -98,26 +97,52 @@ const styles = StyleSheet.create({
   metaLine: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing[2],
+    justifyContent: 'space-between',
   },
-  metaText: {
+  kindTag: {
     fontFamily: font.family.mono,
     fontSize: font.size.mono,
     color: colors.ink[3],
     textTransform: 'uppercase',
     letterSpacing: font.letterSpacing.eyebrow,
   },
-  metaSep: {
+  agoLabel: {
     fontFamily: font.family.mono,
     fontSize: font.size.mono,
     color: colors.ink[4],
+    textTransform: 'uppercase',
+    letterSpacing: font.letterSpacing.eyebrow,
   },
-  agoText: {
-    marginLeft: 'auto',
-  },
-  chevron: {
+  note: {
     fontFamily: font.family.sans,
-    fontSize: 16,
-    color: colors.ink[4],
+    fontSize: font.size.small,
+    color: colors.ink[3],
+  },
+  goalSection: {
+    marginTop: spacing[2],
+    gap: spacing[1],
+  },
+  progressTrack: {
+    height: 3,
+    borderRadius: 2,
+    backgroundColor: colors.border.emphasis,
+    overflow: 'hidden',
+  },
+  progressFill: {
+    height: '100%',
+    borderRadius: 2,
+    backgroundColor: colors.semantic.olive,
+  },
+  goalCaption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  goalPct: {
+    fontFamily: font.family.mono,
+    fontSize: font.size.eyebrow,
+    color: colors.semantic.olive,
+    textTransform: 'uppercase',
+    letterSpacing: font.letterSpacing.eyebrow,
   },
 });

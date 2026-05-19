@@ -1,5 +1,5 @@
 import { Tabs } from 'expo-router';
-import React from 'react';
+import React, { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
@@ -12,6 +12,7 @@ import {
   AddIcon,
 } from '../../src/ui/primitives/TabIcon';
 import { AppHeader } from '../../src/ui/primitives/AppHeader';
+import { AddSheet } from '../../src/ui/components/AddSheet';
 
 function AddTabButton({ onPress }: { onPress?: () => void }) {
   return (
@@ -30,6 +31,7 @@ function AddTabButton({ onPress }: { onPress?: () => void }) {
 export default function TabsLayout() {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
+  const [addOpen, setAddOpen] = useState(false);
 
   return (
     <View style={styles.root}>
@@ -74,11 +76,9 @@ export default function TabsLayout() {
           options={{
             title: '',
             tabBarLabel: () => null,
-            tabBarButton: (props) => {
-              if (!props.onPress) return <AddTabButton />;
-              const handler = () => { (props.onPress as () => void)(); };
-              return <AddTabButton onPress={handler} />;
-            },
+            tabBarButton: () => (
+              <AddTabButton onPress={() => setAddOpen(true)} />
+            ),
           }}
         />
         <Tabs.Screen
@@ -96,6 +96,7 @@ export default function TabsLayout() {
           }}
         />
       </Tabs>
+      <AddSheet open={addOpen} onClose={() => setAddOpen(false)} />
     </View>
   );
 }

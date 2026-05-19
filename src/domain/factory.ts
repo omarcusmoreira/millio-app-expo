@@ -19,6 +19,7 @@ export function buildFreshHousehold(memberName: string): Household {
   return {
     id: ulid(),
     name: null,
+    ownerId: memberId,
     members: [
       {
         id: memberId,
@@ -33,7 +34,6 @@ export function buildFreshHousehold(memberName: string): Household {
         id: accountId,
         name: 'Conta principal',
         ownerId: memberId,
-        last4: '0000',
       },
     ],
     categories: [],

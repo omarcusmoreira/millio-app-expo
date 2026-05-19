@@ -1,5 +1,5 @@
 // Shared primitives used by NewBillSheet and NewIncomeSheet.
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Pressable,
   ScrollView,
@@ -54,6 +54,12 @@ export function DueDatePicker({
   const [viewYear, setViewYear]   = useState(selYear);
   const [viewMonth, setViewMonth] = useState(selMonth);
 
+  const scrollRef   = useRef<ScrollView>(null);
+  const viewportW   = useRef(0);
+
+  const CHIP_W = 34;
+  const GAP    = spacing[2]; // 4
+
   const daysInMonth = new Date(viewYear, viewMonth, 0).getDate();
 
   const prevMonth = () => {
@@ -73,6 +79,19 @@ export function DueDatePicker({
     .toUpperCase();
 
   const activeDay = selYear === viewYear && selMonth === viewMonth ? selDay : -1;
+  const centerDay = activeDay > 0 ? activeDay : Math.ceil(daysInMonth / 2);
+
+  const scrollToDay = (day: number) => {
+    if (!scrollRef.current || viewportW.current === 0) return;
+    const chipCenter = (day - 1) * (CHIP_W + GAP) + CHIP_W / 2;
+    const offset = Math.max(0, chipCenter - viewportW.current / 2);
+    scrollRef.current.scrollTo({ x: offset, animated: false });
+  };
+
+  useEffect(() => {
+    const id = setTimeout(() => scrollToDay(centerDay), 50);
+    return () => clearTimeout(id);
+  }, [viewYear, viewMonth, centerDay]);
 
   return (
     <View style={dp.container}>
@@ -86,9 +105,14 @@ export function DueDatePicker({
         </Pressable>
       </View>
       <ScrollView
+        ref={scrollRef}
         horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={dp.dayRow}
+        onLayout={(e) => {
+          viewportW.current = e.nativeEvent.layout.width;
+          scrollToDay(centerDay);
+        }}
       >
         {Array.from({ length: daysInMonth }, (_, i) => i + 1).map((d) => {
           const isActive = d === activeDay;

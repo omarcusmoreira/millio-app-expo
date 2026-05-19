@@ -3,14 +3,14 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import type { Bill, Category, Member } from '../../domain/entities';
 import { billStatus } from '../../domain/selectors';
-import { Avatar, CategoryChip, Money, StatusBox } from '../primitives';
+import { CategoryChip, MemberAvatar, Money } from '../primitives';
 import { colors, font, spacing } from '../tokens';
 
 interface BillItemProps {
   bill: Bill;
   categories: Category[];
   today: string;
-  assignee?: Member;
+  assignee?: Member | undefined;
   onPress?: () => void;
 }
 
@@ -29,9 +29,16 @@ export function BillItem({ bill, categories, today, assignee, onPress }: BillIte
       onPress={onPress}
       disabled={!onPress}
     >
-      <View style={styles.statusWrap}>
-        <StatusBox status={status} size={16} />
+      {/* Avatar on the left */}
+      <View style={styles.avatarWrap}>
+        {assignee ? (
+          <MemberAvatar member={assignee} size="sm" />
+        ) : (
+          <View style={[styles.avatarPlaceholder, isOverdue && styles.avatarPlaceholderOverdue]} />
+        )}
       </View>
+
+      {/* Info */}
       <View style={styles.info}>
         <Text style={[styles.name, isPaid && styles.namePaid]} numberOfLines={1}>
           {bill.name}
@@ -54,17 +61,14 @@ export function BillItem({ bill, categories, today, assignee, onPress }: BillIte
           </Text>
         </View>
       </View>
-      <View style={styles.rightCol}>
-        <Money
-          value={amount}
-          variant="inline"
-          color={isPaid ? colors.ink[4] : colors.ink[1]}
-          strikethrough={isPaid}
-        />
-        {assignee && (
-          <Avatar initial={assignee.initial} color={assignee.color} size="sm" />
-        )}
-      </View>
+
+      {/* Amount */}
+      <Money
+        value={amount}
+        variant="inline"
+        color={isPaid ? colors.ink[4] : colors.ink[1]}
+        strikethrough={isPaid}
+      />
     </Pressable>
   );
 }
@@ -88,10 +92,12 @@ function daysBetween(a: string, b: string): number {
   return Math.round((db.getTime() - da.getTime()) / (1000 * 60 * 60 * 24));
 }
 
+const AVATAR_SM = 24;
+
 const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
+    alignItems: 'center',
     paddingVertical: spacing[4],
     paddingHorizontal: spacing[7],
     gap: spacing[4],
@@ -99,8 +105,20 @@ const styles = StyleSheet.create({
   rowPressed: {
     opacity: 0.7,
   },
-  statusWrap: {
-    marginTop: 2,
+  avatarWrap: {
+    width: AVATAR_SM,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  avatarPlaceholder: {
+    width: AVATAR_SM,
+    height: AVATAR_SM,
+    borderRadius: AVATAR_SM / 2,
+    borderWidth: 1,
+    borderColor: colors.ink[4],
+  },
+  avatarPlaceholderOverdue: {
+    borderColor: colors.brand.terracotta,
   },
   info: {
     flex: 1,
@@ -137,10 +155,5 @@ const styles = StyleSheet.create({
   },
   duePaid: {
     color: colors.ink[4],
-  },
-  rightCol: {
-    alignSelf: 'stretch',
-    alignItems: 'flex-end',
-    justifyContent: 'space-between',
   },
 });

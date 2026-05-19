@@ -7,22 +7,26 @@ import {
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useHouseholdStore } from '../../src/store/household';
-import { SiloRow } from '../../src/ui/components/SiloRow';
+import { SwipeableSiloRow } from '../../src/ui/components/SwipeableSiloRow';
 import { UpdateValueSheet } from '../../src/ui/components/UpdateValueSheet';
 import { TransferSheet } from '../../src/ui/components/TransferSheet';
+import { NewSiloSheet } from '../../src/ui/components/NewSiloSheet';
+import { ConfirmModal } from '../../src/ui/components/ConfirmModal';
 import { Money } from '../../src/ui/primitives';
 import { colors, font, spacing } from '../../src/ui/tokens';
 import type { Silo } from '../../src/domain/entities';
 
-type ActiveSheet = 'update' | 'transfer' | null;
+type ActiveSheet = 'update' | 'transfer' | 'edit' | null;
 
 export default function SilosScreen() {
   const { t } = useTranslation();
   const household = useHouseholdStore((s) => s.household);
   const today = useHouseholdStore((s) => s.today);
+  const deleteSilo = useHouseholdStore((s) => s.deleteSilo);
 
   const [activeSheet, setActiveSheet] = useState<ActiveSheet>(null);
   const [selectedSilo, setSelectedSilo] = useState<Silo | null>(null);
+  const [deletingSilo, setDeletingSilo] = useState<Silo | null>(null);
 
   const silos = household?.silos ?? [];
   const totalStored = silos.reduce((s, silo) => s + silo.value, 0);
@@ -41,6 +45,22 @@ export default function SilosScreen() {
     <View style={styles.safe}>
       <UpdateValueSheet silo={selectedSilo} open={activeSheet === 'update'} onClose={closeSheet} />
       <TransferSheet silo={selectedSilo} open={activeSheet === 'transfer'} onClose={closeSheet} />
+      <NewSiloSheet
+        open={activeSheet === 'edit'}
+        silo={selectedSilo ?? undefined}
+        onClose={closeSheet}
+      />
+      <ConfirmModal
+        visible={deletingSilo !== null}
+        title={t('silos.confirmDelete.title')}
+        message={t('silos.confirmDelete.message')}
+        confirmLabel={t('common.delete')}
+        onConfirm={() => {
+          if (deletingSilo) deleteSilo(deletingSilo.id);
+          setDeletingSilo(null);
+        }}
+        onCancel={() => setDeletingSilo(null)}
+      />
 
       {/* Header */}
       <View style={styles.header}>
@@ -69,10 +89,15 @@ export default function SilosScreen() {
           data={silos}
           keyExtractor={(s) => s.id}
           renderItem={({ item: silo }) => (
-            <SiloRow
+            <SwipeableSiloRow
               silo={silo}
               today={today}
-              onPress={() => openUpdate(silo)}
+              onContribute={() => openUpdate(silo)}
+              onEdit={() => {
+                setSelectedSilo(silo);
+                setActiveSheet('edit');
+              }}
+              onDelete={() => setDeletingSilo(silo)}
             />
           )}
           ItemSeparatorComponent={() => <View style={styles.separator} />}

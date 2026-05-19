@@ -1,5 +1,6 @@
 export { AppHeader } from './AppHeader';
 export { Avatar } from './Avatar';
+export { MemberAvatar } from './MemberAvatar';
 export { Brand } from './Brand';
 export { CategoryChip } from './CategoryChip';
 export { Chip } from './Chip';

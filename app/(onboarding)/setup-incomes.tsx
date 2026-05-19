@@ -22,7 +22,7 @@ export default function SetupIncomesScreen() {
       <OnboardingNav
         onBack={() => router.back()}
         step={2}
-        totalSteps={4}
+        totalSteps={3}
         stepLabel={t('onboarding.steps.incomes')}
       />
 
@@ -41,7 +41,7 @@ export default function SetupIncomesScreen() {
               <View key={i} style={styles.incomeRow}>
                 <View style={styles.incomeAvatar}>
                   <Text style={styles.incomeAvatarText}>
-                    {displayName[0].toUpperCase()}
+                    {(displayName[0] ?? '').toUpperCase()}
                   </Text>
                 </View>
                 <View style={styles.incomeInfo}>

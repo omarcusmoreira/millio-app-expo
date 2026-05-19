@@ -26,8 +26,9 @@ function endOfWeek(weekStart: string): string {
 
 // ─── Cash ─────────────────────────────────────────────────────────────────────
 
-export const cashOnHand = (h: Household): number =>
+export const cashOnHand = (h: Household, today?: string): number =>
   h.transactions.reduce((acc, t) => {
+    if (today && t.date > today) return acc;
     switch (t.kind) {
       case 'income':
         return acc + t.amount;
@@ -62,8 +63,18 @@ export const billStatus = (
 
 // ─── Free to spend ────────────────────────────────────────────────────────────
 
-export const freeToSpend = (h: Household, today: string): number =>
-  Math.max(0, cashOnHand(h) - totalPending(h));
+export const monthlyIncome = (h: Household): number =>
+  h.incomes.reduce((s, i) => s + i.amount, 0);
+
+export const freeToSpend = (h: Household, today: string): number => {
+  const cash = cashOnHand(h, today);
+  // Only count income transactions that have already been received (date <= today).
+  // Future-dated income doesn't count as cash until the day arrives.
+  // When no received income transactions exist, fall back to the configured monthly schedules.
+  const hasIncomeTx = h.transactions.some((t) => t.kind === 'income' && t.date <= today);
+  const base = hasIncomeTx ? cash : monthlyIncome(h);
+  return Math.max(0, base - totalPending(h));
+};
 
 // ─── Net worth ────────────────────────────────────────────────────────────────
 
@@ -109,15 +120,15 @@ export const nextPaycheck = (
 ): { date: string; income: Income } | null => {
   if (h.incomes.length === 0) return null;
 
-  // Inv-7: highest amount, tie-break by oldest createdAt
-  const main = h.incomes.reduce((best, curr) => {
-    if (curr.amount > best.amount) return curr;
-    if (curr.amount === best.amount && curr.createdAt < best.createdAt)
-      return curr;
-    return best;
-  });
-
-  return { date: nextPaycheckDate(main.schedule, today), income: main };
+  // Pick the soonest upcoming paycheck across all incomes
+  let soonest: { date: string; income: Income } | null = null;
+  for (const income of h.incomes) {
+    const date = nextPaycheckDate(income.schedule, today);
+    if (!soonest || date < soonest.date) {
+      soonest = { date, income };
+    }
+  }
+  return soonest;
 };
 
 export const daysUntilPaycheck = (h: Household, today: string): number => {

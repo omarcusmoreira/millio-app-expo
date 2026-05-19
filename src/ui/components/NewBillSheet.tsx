@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Pressable,
   StyleSheet,
@@ -13,7 +13,8 @@ import { z } from 'zod';
 import { useTranslation } from 'react-i18next';
 import { Sheet } from './Sheet';
 import { useHouseholdStore } from '../../store/household';
-import { Avatar, Dot } from '../primitives';
+import type { Bill } from '../../domain/entities';
+import { Dot, MemberAvatar } from '../primitives';
 import { colors, font, radius, spacing } from '../tokens';
 import { DueDatePicker, Field, shared } from './sheetShared';
 
@@ -28,8 +29,8 @@ const schema = z
     repeatsMonthly: z.boolean(),
     installments: z.string().nullable(),
     assigneeId: z.string().min(1),
-    categoryIds: z.array(z.string()).default([]),
-    labelIds: z.array(z.string()).default([]),
+    categoryIds: z.array(z.string()),
+    labelIds: z.array(z.string()),
   })
   .superRefine((data, ctx) => {
     if (!data.variable) {
@@ -53,17 +54,20 @@ function addMonths(isoDate: string, months: number): string {
 interface NewBillSheetProps {
   open: boolean;
   onClose: () => void;
+  bill?: Bill | undefined;
 }
 
-export function NewBillSheet({ open, onClose }: NewBillSheetProps) {
+export function NewBillSheet({ open, onClose, bill }: NewBillSheetProps) {
   const { t } = useTranslation();
   const household = useHouseholdStore((s) => s.household);
   const today = useHouseholdStore((s) => s.today);
   const addBill = useHouseholdStore((s) => s.addBill);
+  const updateBill = useHouseholdStore((s) => s.updateBill);
+
+  const isEditing = !!bill;
 
   const members = household?.members ?? [];
   const categories = household?.categories ?? [];
-  const labels = household?.labels ?? [];
   const defaultAssignee = members[0]?.id ?? '';
 
   const [showEndDate, setShowEndDate] = useState(false);
@@ -94,28 +98,70 @@ export function NewBillSheet({ open, onClose }: NewBillSheetProps) {
   const repeatsMonthly = watch('repeatsMonthly');
   const dueDate = watch('dueDate');
 
+  useEffect(() => {
+    if (open && bill) {
+      const hasInstallments = !!bill.endsAt;
+      setShowEndDate(hasInstallments);
+      reset({
+        name: bill.name,
+        variable: bill.variable,
+        amount: bill.variable
+          ? (bill.estimate != null ? String(bill.estimate) : '')
+          : (bill.amount != null ? String(bill.amount) : ''),
+        dueDate: bill.due,
+        repeatsMonthly: bill.recurring === 'monthly',
+        installments: hasInstallments && bill.endsAt
+          ? String(
+              (new Date(bill.endsAt).getFullYear() - new Date(bill.due).getFullYear()) * 12 +
+              (new Date(bill.endsAt).getMonth() - new Date(bill.due).getMonth()) + 1
+            )
+          : null,
+        assigneeId: bill.assigneeId,
+        categoryIds: bill.categoryIds,
+        labelIds: bill.labelIds,
+      });
+    } else if (!open) {
+      reset({
+        name: '',
+        variable: false,
+        amount: '',
+        dueDate: today,
+        repeatsMonthly: true,
+        installments: null,
+        assigneeId: defaultAssignee,
+        categoryIds: [],
+        labelIds: [],
+      });
+      setShowEndDate(false);
+    }
+  }, [open, bill]);
+
   const onSubmit = (values: FormValues) => {
     const amountRaw = parseFloat(values.amount.replace(',', '.'));
     const amount = values.variable ? null : amountRaw;
     const estimate = values.variable ? (values.amount ? amountRaw : null) : null;
 
-    addBill({
+    const draft = {
       name: values.name.trim(),
       variable: values.variable,
       amount: amount !== null && !isNaN(amount) ? amount : null,
       estimate: estimate !== null && !isNaN(estimate) ? estimate : null,
       due: values.dueDate,
-      recurring: values.repeatsMonthly ? 'monthly' : 'one-time',
+      recurring: values.repeatsMonthly ? ('monthly' as const) : ('one-time' as const),
       endsAt: values.repeatsMonthly && values.installments
         ? addMonths(values.dueDate, parseInt(values.installments, 10) - 1)
         : null,
       assigneeId: values.assigneeId,
       categoryIds: values.categoryIds,
       labelIds: values.labelIds,
-    });
+    };
 
-    reset();
-    setShowEndDate(false);
+    if (isEditing && bill) {
+      updateBill(bill.id, draft);
+    } else {
+      addBill(draft);
+    }
+
     onClose();
   };
 
@@ -129,7 +175,9 @@ export function NewBillSheet({ open, onClose }: NewBillSheetProps) {
           style={({ pressed }) => [shared.submitBtn, pressed && shared.submitBtnPressed]}
           onPress={handleSubmit(onSubmit)}
         >
-          <Text style={shared.submitLabel}>{t('addSheet.newBill.submit')}</Text>
+          <Text style={shared.submitLabel}>
+            {isEditing ? t('addSheet.newBill.save') : t('addSheet.newBill.submit')}
+          </Text>
         </Pressable>
       }
     >
@@ -297,34 +345,6 @@ export function NewBillSheet({ open, onClose }: NewBillSheetProps) {
         </Field>
       )}
 
-      {/* Labels */}
-      {labels.length > 0 && (
-        <Field label={t('lar.setupItems.labels')}>
-          <Controller
-            control={control}
-            name="labelIds"
-            render={({ field: { value, onChange } }) => (
-              <View style={shared.chipWrap}>
-                {labels.map((label) => {
-                  const selected = value.includes(label.id);
-                  return (
-                    <Pressable
-                      key={label.id}
-                      style={[shared.selectChip, selected && shared.selectChipActive]}
-                      onPress={() => onChange(selected ? [] : [label.id])}
-                    >
-                      <Text style={[shared.selectChipLabel, selected && shared.selectChipLabelActive]}>
-                        {label.name}
-                      </Text>
-                    </Pressable>
-                  );
-                })}
-              </View>
-            )}
-          />
-        </Field>
-      )}
-
       {/* Assignee — only shown when multiple members */}
       {members.length > 1 && (
         <Field label={t('addSheet.newBill.assignee')} error={errors.assigneeId?.message}>
@@ -341,7 +361,7 @@ export function NewBillSheet({ open, onClose }: NewBillSheetProps) {
                       style={[shared.assigneeChip, selected && shared.selectChipActive]}
                       onPress={() => onChange(m.id)}
                     >
-                      <Avatar initial={m.initial} color={m.color} size="sm" />
+                      <MemberAvatar member={m} size="sm" />
                       <Text style={[shared.selectChipLabel, selected && shared.selectChipLabelActive]}>
                         {m.name}
                       </Text>

@@ -38,7 +38,7 @@ function addAccount(w: World): string {
   w.household = {
     ...w.household,
     cashAccounts: [
-      { id, name: 'Itaú checking', ownerId: w.household.members[0]?.id ?? 'm1', last4: '0000' },
+      { id, name: 'Itaú checking', ownerId: w.household.members[0]?.id ?? 'm1' },
     ],
   };
   return id;
@@ -52,6 +52,7 @@ function addSilo(w: World, name: string, value: number): Silo {
     kind: 'savings',
     note: '',
     goalAmount: null,
+    labelIds: [],
     createdAt: w.today,
     updatedAt: w.today,
   };
@@ -94,6 +95,7 @@ describe('Feature: Create a silo', () => {
       kind: 'savings',
       note: '',
       goalAmount: parseMoney('R$ 6.000,00'),
+      labelIds: [],
       createdAt: w.today,
       updatedAt: w.today,
     };

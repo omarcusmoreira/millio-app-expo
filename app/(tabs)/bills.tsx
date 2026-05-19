@@ -10,9 +10,12 @@ import { useTranslation } from 'react-i18next';
 import { ChevronLeft, ChevronRight } from 'lucide-react-native';
 import { useHouseholdStore } from '../../src/store/household';
 import { billStatus } from '../../src/domain/selectors';
-import { BillItem } from '../../src/ui/components/BillItem';
+import { SwipeableBillItem } from '../../src/ui/components/SwipeableBillItem';
+import { NewBillSheet } from '../../src/ui/components/NewBillSheet';
+import { ConfirmModal } from '../../src/ui/components/ConfirmModal';
 import { Money } from '../../src/ui/primitives';
 import { colors, font, radius, spacing } from '../../src/ui/tokens';
+import type { Bill } from '../../src/domain/entities';
 
 type Filter = 'all' | 'upcoming' | 'paid';
 
@@ -30,7 +33,11 @@ export default function BillsScreen() {
   const { t, i18n } = useTranslation();
   const household = useHouseholdStore((s) => s.household);
   const today = useHouseholdStore((s) => s.today);
+  const updateBill = useHouseholdStore((s) => s.updateBill);
+  const deleteBill = useHouseholdStore((s) => s.deleteBill);
   const [filter, setFilter] = useState<Filter>('all');
+  const [editBill, setEditBill] = useState<Bill | null>(null);
+  const [deletingBill, setDeletingBill] = useState<Bill | null>(null);
 
   const [todayYear, todayMonth] = today.split('-').map(Number) as [number, number];
   const [viewYear, setViewYear] = useState(todayYear);
@@ -75,6 +82,23 @@ export default function BillsScreen() {
 
   return (
     <View style={styles.safe}>
+      <NewBillSheet
+        open={editBill !== null}
+        bill={editBill ?? undefined}
+        onClose={() => setEditBill(null)}
+      />
+      <ConfirmModal
+        visible={deletingBill !== null}
+        title={t('addSheet.newBill.deleteBill')}
+        message={t('common.deleteConfirm')}
+        confirmLabel={t('addSheet.newBill.deleteBill')}
+        cancelLabel={t('common.cancel')}
+        onConfirm={() => {
+          if (deletingBill) deleteBill(deletingBill.id);
+          setDeletingBill(null);
+        }}
+        onCancel={() => setDeletingBill(null)}
+      />
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.titleRow}>
@@ -136,11 +160,17 @@ export default function BillsScreen() {
           renderItem={({ item: bill }) => {
             const assignee = memberById(bill.assigneeId);
             return (
-              <BillItem
+              <SwipeableBillItem
                 bill={bill}
                 categories={household?.categories ?? []}
                 today={today}
-                assignee={assignee ?? undefined}
+                assignee={assignee}
+                onEdit={() => setEditBill(bill)}
+                onPay={() => bill.paidAt
+                  ? updateBill(bill.id, { paidAt: null, paidAmount: null, paidFromAccountId: null })
+                  : updateBill(bill.id, { paidAt: today, paidAmount: bill.amount ?? bill.estimate ?? 0, paidFromAccountId: null })
+                }
+                onDelete={() => setDeletingBill(bill)}
               />
             );
           }}

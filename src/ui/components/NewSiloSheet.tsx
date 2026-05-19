@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -6,8 +6,9 @@ import { z } from 'zod';
 import { useTranslation } from 'react-i18next';
 import { Sheet } from './Sheet';
 import { useHouseholdStore } from '../../store/household';
-import type { SiloKind } from '../../domain/entities';
+import type { Silo, SiloKind } from '../../domain/entities';
 import { colors, font, radius, spacing } from '../tokens';
+import { shared } from './sheetShared';
 
 const schema = z.object({
   name: z.string().min(1),
@@ -15,6 +16,7 @@ const schema = z.object({
   goalAmount: z.string(),
   kind: z.enum(['property', 'savings', 'equity', 'vehicle', 'other'] as const),
   note: z.string(),
+  labelIds: z.array(z.string()),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -24,29 +26,56 @@ const KINDS: SiloKind[] = ['savings', 'property', 'equity', 'vehicle', 'other'];
 interface NewSiloSheetProps {
   open: boolean;
   onClose: () => void;
+  silo?: Silo | undefined;
 }
 
-export function NewSiloSheet({ open, onClose }: NewSiloSheetProps) {
+export function NewSiloSheet({ open, onClose, silo }: NewSiloSheetProps) {
   const { t } = useTranslation();
-  const addSilo = useHouseholdStore((s) => s.addSilo);
+  const addSilo    = useHouseholdStore((s) => s.addSilo);
+  const updateSilo = useHouseholdStore((s) => s.updateSilo);
+  const household  = useHouseholdStore((s) => s.household);
+
+  const labels    = household?.labels ?? [];
+  const isEditing = !!silo;
 
   const { control, handleSubmit, reset, formState: { errors } } = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: { name: '', value: '', goalAmount: '', kind: 'savings', note: '' },
+    defaultValues: { name: '', value: '', goalAmount: '', kind: 'savings', note: '', labelIds: [] },
   });
+
+  useEffect(() => {
+    if (open && silo) {
+      reset({
+        name: silo.name,
+        value: String(silo.value),
+        goalAmount: silo.goalAmount != null ? String(silo.goalAmount) : '',
+        kind: silo.kind,
+        note: silo.note,
+        labelIds: silo.labelIds,
+      });
+    } else if (!open) {
+      reset({ name: '', value: '', goalAmount: '', kind: 'savings', note: '', labelIds: [] });
+    }
+  }, [open, silo]);
 
   const onSubmit = (values: FormValues) => {
     const value = values.value ? parseFloat(values.value.replace(',', '.')) : 0;
     const goalAmount = values.goalAmount ? parseFloat(values.goalAmount.replace(',', '.')) : null;
 
-    addSilo({
+    const draft = {
       name: values.name.trim(),
       value: isNaN(value) ? 0 : value,
       goalAmount: goalAmount !== null && !isNaN(goalAmount) ? goalAmount : null,
       kind: values.kind,
       note: values.note.trim(),
-    });
-    reset();
+      labelIds: values.labelIds,
+    };
+
+    if (isEditing && silo) {
+      updateSilo(silo.id, draft);
+    } else {
+      addSilo(draft);
+    }
     onClose();
   };
 
@@ -54,13 +83,15 @@ export function NewSiloSheet({ open, onClose }: NewSiloSheetProps) {
     <Sheet
       open={open}
       onClose={onClose}
-      title={t('silos.newSilo')}
+      title={isEditing ? t('silos.detail.title', { name: silo?.name ?? '' }) : t('silos.newSilo')}
       footer={
         <Pressable
           style={({ pressed }) => [styles.submitBtn, pressed && styles.submitBtnPressed]}
           onPress={handleSubmit(onSubmit)}
         >
-          <Text style={styles.submitLabel}>{t('silos.newSilo')}</Text>
+          <Text style={styles.submitLabel}>
+            {isEditing ? t('addSheet.silo.save') : t('silos.newSilo')}
+          </Text>
         </Pressable>
       }
     >
@@ -156,6 +187,35 @@ export function NewSiloSheet({ open, onClose }: NewSiloSheetProps) {
           )}
         />
       </Field>
+
+      {labels.length > 0 && (
+        <Field label={t('lar.setupItems.labels')}>
+          <Controller
+            control={control}
+            name="labelIds"
+            render={({ field: { value, onChange } }) => (
+              <View style={shared.chipWrap}>
+                {labels.map((label) => {
+                  const selected = value.includes(label.id);
+                  return (
+                    <Pressable
+                      key={label.id}
+                      style={[shared.selectChip, selected && shared.selectChipActive]}
+                      onPress={() =>
+                        onChange(selected ? value.filter((id) => id !== label.id) : [...value, label.id])
+                      }
+                    >
+                      <Text style={[shared.selectChipLabel, selected && shared.selectChipLabelActive]}>
+                        {label.name}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+              </View>
+            )}
+          />
+        </Field>
+      )}
     </Sheet>
   );
 }

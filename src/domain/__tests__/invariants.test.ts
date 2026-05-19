@@ -47,8 +47,9 @@ const income = (): Income => ({
 const emptyHousehold = (): Household => ({
   id: ID('h1'),
   name: 'Test household',
+  ownerId: ID('1'),
   members: [member()],
-  cashAccounts: [{ id: ID('acc1'), name: 'Checking', ownerId: ID('1'), last4: '1234' }],
+  cashAccounts: [{ id: ID('acc1'), name: 'Checking', ownerId: ID('1') }],
   categories: [],
   labels: [],
   bills: [],

@@ -21,7 +21,7 @@ export default function SetupBillsScreen() {
       <OnboardingNav
         onBack={() => router.back()}
         step={1}
-        totalSteps={4}
+        totalSteps={3}
         stepLabel={t('onboarding.steps.bills')}
       />
 

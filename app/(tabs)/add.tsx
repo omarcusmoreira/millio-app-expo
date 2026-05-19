@@ -28,6 +28,6 @@ export default function AddScreen() {
 const styles = StyleSheet.create({
   bg: {
     flex: 1,
-    backgroundColor: 'transparent',
+    backgroundColor: colors.background.page,
   },
 });

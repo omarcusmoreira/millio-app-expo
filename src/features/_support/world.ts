@@ -34,6 +34,7 @@ export const createWorld = (): World => ({
 export const emptyHousehold = (): Household => ({
   id: 'h1',
   name: null,
+  ownerId: '',
   members: [], cashAccounts: [], categories: [], labels: [],
   bills: [], silos: [], incomes: [], transactions: [],
   allowance: { weekStart: '2026-05-11', override: null },

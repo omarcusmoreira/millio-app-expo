@@ -1,22 +1,21 @@
 import React from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Bell, User } from 'lucide-react-native';
+import { Settings } from 'lucide-react-native';
+import { useRouter } from 'expo-router';
 import { colors, spacing } from '../tokens';
 import { Brand } from './Brand';
 
 export function AppHeader() {
   const insets = useSafeAreaInsets();
+  const router = useRouter();
 
   return (
     <View style={[styles.row, { paddingTop: insets.top + spacing[3] }]}>
       <Brand size={18} />
       <View style={styles.icons}>
-        <Pressable style={styles.iconBtn}>
-          <Bell color={colors.ink[2]} size={20} strokeWidth={1.5} />
-        </Pressable>
-        <Pressable style={styles.iconBtn}>
-          <User color={colors.ink[2]} size={20} strokeWidth={1.5} />
+        <Pressable style={styles.iconBtn} onPress={() => router.push('/settings')}>
+          <Settings color={colors.ink[2]} size={20} strokeWidth={1.5} />
         </Pressable>
       </View>
     </View>

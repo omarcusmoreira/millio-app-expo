@@ -107,7 +107,7 @@ function background(withBalance = false): World {
   w.household = {
     ...w.household,
     cashAccounts: [
-      { id: 'acc-itau', name: 'Itaú checking', ownerId: w.household.members[0]?.id ?? 'm1', last4: '0000' },
+      { id: 'acc-itau', name: 'Itaú checking', ownerId: w.household.members[0]?.id ?? 'm1' },
     ],
   };
   if (withBalance) seedBalance(w, parseMoney('R$ 10.000,00'));

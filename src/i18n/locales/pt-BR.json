@@ -28,7 +28,8 @@
     "yesterday": "ontem",
     "perMonth": "/mês",
     "and": "e",
-    "goal": "Meta"
+    "goal": "Meta",
+    "deleteConfirm": "Essa ação não pode ser desfeita."
   },
   "currency": {
     "symbol": "R$",
@@ -169,6 +170,7 @@
     "billsCount": "{{count}} CONTAS",
     "inSilos": "Nos silos",
     "silosCount": "{{count}} SILOS",
+    "paycheckIn": "{{days}} DIAS ATÉ O PRÓXIMO PAGAMENTO DE",
     "comingUp": "Próximas",
     "paidCount": "{{paid}} PAGAS · {{remaining}} A PAGAR",
     "seeAll": "Ver todas as contas →"
@@ -257,6 +259,10 @@
       "explainer": "Isso não move dinheiro. Atualizar um silo nunca muda seu \"livre pra gastar\".",
       "save": "Salvar novo valor",
       "successFlash": "{{name}} atualizado para {{value}}"
+    },
+    "confirmDelete": {
+      "title": "Excluir silo?",
+      "message": "Essa ação não pode ser desfeita."
     }
   },
   "addSheet": {
@@ -308,15 +314,6 @@
       "successFlashToSilo": "{{value}} guardado em {{name}}",
       "successFlashFromSilo": "{{value}} retirado de {{name}}"
     },
-    "income": {
-      "amount": "Valor recebido",
-      "source": "Origem",
-      "sourcePlaceholder": "Bônus, presente, restituição…",
-      "whoReceived": "Quem recebeu",
-      "depositedTo": "Depositado em",
-      "submit": "Registrar renda",
-      "successFlash": "Renda registrada"
-    },
     "newBill": {
       "name": "Nome",
       "namePlaceholder": "Luz, academia, lanche da escola…",
@@ -330,7 +327,33 @@
       "installmentsPlaceholder": "Ex: 12",
       "assignee": "Responsável",
       "submit": "Adicionar obrigação",
+      "save": "Salvar",
+      "deleteBill": "Excluir conta",
       "successFlash": "Obrigação adicionada"
+    },
+    "income": {
+      "newTitle": "Nova renda recorrente",
+      "editTitle": "Editar renda",
+      "name": "Fonte",
+      "namePlaceholder": "Salário, freela, aluguel…",
+      "amount": "Valor mensal",
+      "schedule": "Frequência",
+      "monthly": "Todo mês",
+      "split": "2× por mês",
+      "biweekly": "A cada 2 semanas",
+      "day": "Dia {{n}}",
+      "submit": "Adicionar",
+      "save": "Salvar",
+      "delete": "Excluir renda",
+      "source": "Origem",
+      "sourcePlaceholder": "Bônus, presente, restituição…",
+      "whoReceived": "Quem recebeu",
+      "depositedTo": "Depositado em",
+      "successFlash": "Renda registrada"
+    },
+    "silo": {
+      "save": "Salvar",
+      "delete": "Excluir silo"
     }
   },
   "allowance": {
@@ -410,12 +433,12 @@
   "member": {
     "monthlyIncome": "Renda mensal",
     "receivedThisYear": "Recebido este ano",
-    "recurringIncome": "Renda recorrente",
+    "recurringIncome": "Renda",
     "billsAssigned": "Contas atribuídas",
     "pendingMany": "{{count}} contas pendentes",
     "pendingOne": "{{count}} conta pendente",
     "settled": "Tudo em dia",
-    "emptyIncomes": "Sem renda recorrente para {{name}} ainda. Toque em + Adicionar para configurar um salário ou pagamento fixo.",
+    "emptyIncomes": "Nenhuma renda registrada para {{name}} ainda. Toque em + para adicionar.",
     "emptyBills": "{{name}} ainda não tem nenhuma conta atribuída.",
     "scheduleMonthly": "Todo dia {{day}}",
     "scheduleSplit": "Dia {{d1}} e dia {{d2}} de cada mês",
@@ -457,11 +480,34 @@
       "editTitle": "Editar conta",
       "newTitle": "Nova conta bancária",
       "namePlaceholder": "Itaú corrente, Nubank conjunta…",
-      "last4": "Últimos 4 dígitos",
       "owner": "Titular",
       "addedFlash": "Conta adicionada",
       "updatedFlash": "Conta atualizada",
       "removedFlash": "Conta removida"
+    }
+  },
+  "settings": {
+    "title": "Configurações",
+    "profile": {
+      "heading": "Perfil",
+      "name": "Nome",
+      "email": "E-mail",
+      "birthdate": "Aniversário",
+      "birthdatePlaceholder": "DD/MM/AAAA",
+      "namePlaceholder": "Seu nome"
+    },
+    "household": {
+      "heading": "Household",
+      "householdName": "Nome do lar",
+      "householdNamePlaceholder": "Como chama o lar?",
+      "members": "Membros",
+      "addMember": "Adicionar membro",
+      "memberNamePlaceholder": "Nome do membro",
+      "removeMember": "Remover membro",
+      "invite": "Convidar membros",
+      "inviteSub": "Compartilhe um código ou link de convite",
+      "join": "Ingressar em um lar",
+      "joinSub": "Use o código que alguém te enviou"
     }
   },
   "errors": {

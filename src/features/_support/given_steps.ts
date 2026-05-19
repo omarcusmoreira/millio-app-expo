@@ -92,7 +92,7 @@ Given<World>('a silo {string} with {string}', (w, name, amount) => {
 // Bank accounts
 // ─────────────────────────────────────────────────────────────
 Given<World>('a bank account {string} with {string} balance', (w, name, balance) => {
-  const account = { id: ulid(), name, ownerId: w.household.members[0]?.id ?? 'm1', last4: '0000' };
+  const account = { id: ulid(), name, ownerId: w.household.members[0]?.id ?? 'm1' };
   w.household.cashAccounts.push(account);
   // Seed cash via initial income txn (so the cashOnHand selector returns it)
   w.household.transactions.push({

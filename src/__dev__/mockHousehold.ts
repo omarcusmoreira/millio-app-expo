@@ -7,18 +7,21 @@ import type { Household } from '../domain/entities';
 export const MOCK_HOUSEHOLD: Household = {
   id: 'mock-household-01',
   name: 'Lar dos Carvalho',
+  ownerId: 'm1',
   locale: 'pt-BR',
   createdAt: '2026-01-01',
 
   members: [
     { id: 'm1', name: 'Marcos',   initial: 'M', color: 'terracotta', joinedAt: '2026-01-01' },
     { id: 'm2', name: 'Patrícia', initial: 'P', color: 'olive',      joinedAt: '2026-01-01' },
+    { id: 'm3', name: 'Rafael',   initial: 'R', color: 'grey',       joinedAt: '2026-02-01' },
+    { id: 'm4', name: 'Beatriz',  initial: 'B', color: 'grey',       joinedAt: '2026-03-01' },
   ],
 
   cashAccounts: [
-    { id: 'a1', name: 'Itaú corrente',   ownerId: 'm1', last4: '4421' },
-    { id: 'a2', name: 'Nubank conjunta', ownerId: 'm2', last4: '9088' },
-    { id: 'a3', name: 'Itaú crédito',    ownerId: 'm1', last4: '1003' },
+    { id: 'a1', name: 'Itaú corrente',   ownerId: 'm1' },
+    { id: 'a2', name: 'Nubank conjunta', ownerId: 'm2' },
+    { id: 'a3', name: 'Itaú crédito',    ownerId: 'm1' },
   ],
 
   categories: [
@@ -89,11 +92,11 @@ export const MOCK_HOUSEHOLD: Household = {
   ],
 
   silos: [
-    { id: 'as1', name: 'Apartamento',           value: 642000, kind: 'property', note: 'Estimativa de mercado',   goalAmount: null,  updatedAt: '2026-03-12', createdAt: '2025-01-01' },
-    { id: 'as2', name: 'Reserva de emergência', value: 18400,  kind: 'savings',  note: 'CDB Itaú',                goalAmount: 30000, updatedAt: '2026-05-09', createdAt: '2025-01-01' },
-    { id: 'as3', name: 'Ações Tesla',           value: 9120,   kind: 'equity',   note: '38 cotas',                goalAmount: null,  updatedAt: '2026-04-28', createdAt: '2025-01-01' },
-    { id: 'as4', name: 'Honda Civic',           value: 11500,  kind: 'vehicle',  note: '2019, 47 mil km',         goalAmount: null,  updatedAt: '2026-02-04', createdAt: '2025-01-01' },
-    { id: 'as5', name: 'Faculdade da Sofia',    value: 14200,  kind: 'savings',  note: 'Plano educacional',       goalAmount: 50000, updatedAt: '2026-05-01', createdAt: '2025-01-01' },
+    { id: 'as1', name: 'Apartamento',           value: 642000, kind: 'property', note: 'Estimativa de mercado',   goalAmount: null,  labelIds: [],       updatedAt: '2026-03-12', createdAt: '2025-01-01' },
+    { id: 'as2', name: 'Reserva de emergência', value: 18400,  kind: 'savings',  note: 'CDB Itaú',                goalAmount: 30000, labelIds: ['l4'],   updatedAt: '2026-05-09', createdAt: '2025-01-01' },
+    { id: 'as3', name: 'Ações Tesla',           value: 9120,   kind: 'equity',   note: '38 cotas',                goalAmount: null,  labelIds: [],       updatedAt: '2026-04-28', createdAt: '2025-01-01' },
+    { id: 'as4', name: 'Honda Civic',           value: 11500,  kind: 'vehicle',  note: '2019, 47 mil km',         goalAmount: null,  labelIds: [],       updatedAt: '2026-02-04', createdAt: '2025-01-01' },
+    { id: 'as5', name: 'Faculdade da Sofia',    value: 14200,  kind: 'savings',  note: 'Plano educacional',       goalAmount: 50000, labelIds: ['l4'],   updatedAt: '2026-05-01', createdAt: '2025-01-01' },
   ],
 
   incomes: [
@@ -104,14 +107,15 @@ export const MOCK_HOUSEHOLD: Household = {
 
   // Transactions drive cashOnHand (derived, not stored).
   // Running total:
-  //   income  +6800 +2600 +2600 +1820     = +13820
-  //   bill-payment -2850 -89 -24 -184     =  -3147
-  //   expense  -142.40 -68.50 -84         =  -294.90
-  //   transfer-in (to silo) -1000         =  -1000
-  // cashOnHand ≈ 9378  →  freeToSpend ≈ 8343 (pending ≈ 1035)
+  //   income  +6800 +2600 +2600 +800 +1820     = +14620
+  //   bill-payment -2850 -89 -24 -184           =  -3147
+  //   expense  -142.40 -68.50 -84               =  -294.90
+  //   transfer-in (to silo) -1000               =  -1000
+  // cashOnHand ≈ 10178  →  freeToSpend ≈ 9143 (pending ≈ 1035)
   transactions: [
     { id: 't7',  kind: 'income',       name: 'Salário — Atlas Logística',    amount: 6800,   date: '2026-05-01', byMemberId: 'm1', accountId: 'a1', siloId: null,  billId: null,  categoryIds: [], createdAt: '2026-05-01' },
     { id: 't8',  kind: 'income',       name: 'Salário — Hospital São Lucas', amount: 2600,   date: '2026-05-01', byMemberId: 'm2', accountId: 'a2', siloId: null,  billId: null,  categoryIds: [], createdAt: '2026-05-01' },
+    { id: 'ti1', kind: 'income',       name: 'Freela',                       amount: 800,    date: '2026-05-16', byMemberId: 'm1', accountId: 'a1', siloId: null,  billId: null,  categoryIds: [], createdAt: '2026-05-16' },
     { id: 'tp1', kind: 'bill-payment', name: 'Aluguel',                      amount: 2850,   date: '2026-05-01', byMemberId: 'm1', accountId: 'a1', siloId: null,  billId: 'b1',  categoryIds: [], createdAt: '2026-05-01' },
     { id: 'tp2', kind: 'bill-payment', name: 'Internet (Vivo)',               amount: 89,     date: '2026-05-04', byMemberId: 'm2', accountId: 'a2', siloId: null,  billId: 'b2',  categoryIds: [], createdAt: '2026-05-04' },
     { id: 'tp3', kind: 'bill-payment', name: 'Netflix',                       amount: 24,     date: '2026-05-07', byMemberId: 'm2', accountId: 'a2', siloId: null,  billId: 'b3',  categoryIds: [], createdAt: '2026-05-07' },

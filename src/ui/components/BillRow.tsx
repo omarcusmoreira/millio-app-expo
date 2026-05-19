@@ -3,7 +3,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import type { Bill, Category, Member } from '../../domain/entities';
 import { billStatus } from '../../domain/selectors';
-import { Avatar, Dot, Money, StatusBox } from '../primitives';
+import { Dot, MemberAvatar, Money, StatusBox } from '../primitives';
 import { colors, font, spacing } from '../tokens';
 
 interface BillRowProps {
@@ -82,7 +82,7 @@ export function BillRow({
 
           {showAssignee && (
             <View style={styles.avatarWrap}>
-              <Avatar initial={assignee.initial} color={assignee.color} size="sm" />
+              <MemberAvatar member={assignee} size="sm" />
             </View>
           )}
         </View>

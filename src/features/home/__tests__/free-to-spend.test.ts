@@ -113,7 +113,7 @@ function background(): World {
   const accountId = 'acc-itau';
   w.household = {
     ...w.household,
-    cashAccounts: [{ id: accountId, name: 'Itaú checking', ownerId: w.household.members[0]?.id ?? 'm1', last4: '0000' }],
+    cashAccounts: [{ id: accountId, name: 'Itaú checking', ownerId: w.household.members[0]?.id ?? 'm1' }],
   };
   // Seed balance: R$ 10.000,00 = 10000
   addBalance(w, accountId, parseMoney('R$ 10.000,00'));

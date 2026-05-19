@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { Archive, Calendar, ShoppingCart, TrendingUp } from 'lucide-react-native';
 import { Sheet } from './Sheet';
 import { NewExpenseSheet } from './NewExpenseSheet';
 import { NewIncomeSheet } from './NewIncomeSheet';
@@ -29,21 +30,25 @@ export function AddSheet({ open, onClose }: AddSheetProps) {
       <Sheet open={open && action === null} onClose={handleClose} title={t('addSheet.title')}>
         <View style={styles.grid}>
           <KindCard
+            icon={<ShoppingCart size={18} color={colors.brand.terracotta} strokeWidth={1.8} />}
             title={t('addSheet.kinds.expense.title')}
             sub={t('addSheet.kinds.expense.sub')}
             onPress={() => setAction('expense')}
           />
           <KindCard
+            icon={<Calendar size={18} color={colors.brand.terracotta} strokeWidth={1.8} />}
             title={t('addSheet.kinds.bill.title')}
             sub={t('addSheet.kinds.bill.sub')}
             onPress={() => setAction('bill')}
           />
           <KindCard
+            icon={<TrendingUp size={18} color={colors.brand.terracotta} strokeWidth={1.8} />}
             title={t('addSheet.kinds.income.title')}
             sub={t('addSheet.kinds.income.sub')}
             onPress={() => setAction('income')}
           />
           <KindCard
+            icon={<Archive size={18} color={colors.brand.terracotta} strokeWidth={1.8} />}
             title={t('addSheet.kinds.asset.title')}
             sub={t('addSheet.kinds.asset.sub')}
             onPress={() => setAction('silo')}
@@ -59,14 +64,19 @@ export function AddSheet({ open, onClose }: AddSheetProps) {
   );
 }
 
-function KindCard({ title, sub, onPress }: { title: string; sub: string; onPress: () => void }) {
+function KindCard({ icon, title, sub, onPress }: { icon: React.ReactNode; title: string; sub: string; onPress: () => void }) {
   return (
     <Pressable
       style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}
       onPress={onPress}
     >
-      <Text style={styles.cardTitle}>{title}</Text>
-      <Text style={styles.cardSub}>{sub}</Text>
+      <View style={styles.cardRow}>
+        <View style={styles.iconCircle}>{icon}</View>
+        <View style={styles.cardText}>
+          <Text style={styles.cardTitle}>{title}</Text>
+          <Text style={styles.cardSub}>{sub}</Text>
+        </View>
+      </View>
     </Pressable>
   );
 }
@@ -86,6 +96,24 @@ const styles = StyleSheet.create({
   },
   cardPressed: {
     backgroundColor: colors.background.keyboardChip,
+  },
+  cardRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing[4],
+  },
+  iconCircle: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: colors.brand.terracottaSoft,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+  },
+  cardText: {
+    flex: 1,
+    gap: spacing[1],
   },
   cardTitle: {
     fontFamily: font.family.sans,

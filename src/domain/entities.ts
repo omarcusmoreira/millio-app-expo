@@ -15,7 +15,6 @@ export interface CashAccount {
   id: ID;
   name: string;
   ownerId: ID;
-  last4: string;
 }
 
 export interface Category {
@@ -65,6 +64,7 @@ export interface Silo {
   kind: SiloKind;
   note: string;
   goalAmount: number | null;
+  labelIds: ID[];
   updatedAt: string;
   createdAt: string;
 }
@@ -114,6 +114,7 @@ export interface WeeklyAllowance {
 export interface Household {
   id: ID;
   name: string | null;
+  ownerId: ID;
   members: Member[];
   cashAccounts: CashAccount[];
   categories: Category[];

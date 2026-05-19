@@ -108,11 +108,6 @@ describe('Feature: Setup — deduplication and validation', () => {
     expect(deduplicateIds(ids)).toEqual(['a', 'b', 'c']);
   });
 
-  it('@unit Last4 accepts digits only — non-digit characters are stripped by the domain', () => {
-    const last4 = 'abcd1234'.replace(/\D/g, '').slice(-4);
-    expect(last4).toBe('1234');
-  });
-
   it('@unit Valid color tokens and hex values', () => {
     expect(isValidColor('terracotta')).toBe(true);
     expect(isValidColor('olive')).toBe(true);

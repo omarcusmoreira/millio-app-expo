@@ -12,7 +12,7 @@ import { z } from 'zod';
 import { useTranslation } from 'react-i18next';
 import { Sheet } from './Sheet';
 import { useHouseholdStore } from '../../store/household';
-import { Avatar } from '../primitives';
+import { MemberAvatar } from '../primitives';
 import { colors, font, radius, spacing } from '../tokens';
 
 const schema = z.object({
@@ -135,7 +135,7 @@ export function NewExpenseSheet({ open, onClose }: Props) {
                       onPress={() => onChange(acc.id)}
                     >
                       <Text style={[styles.selectChipLabel, selected && styles.selectChipLabelActive]}>
-                        {acc.name}{acc.last4 ? ` ···· ${acc.last4}` : ''}
+                        {acc.name}
                       </Text>
                     </Pressable>
                   );
@@ -162,7 +162,7 @@ export function NewExpenseSheet({ open, onClose }: Props) {
                       style={[styles.assigneeChip, selected && styles.selectChipActive]}
                       onPress={() => onChange(m.id)}
                     >
-                      <Avatar initial={m.initial} color={m.color} size="sm" />
+                      <MemberAvatar member={m} size="sm" />
                       <Text style={[styles.selectChipLabel, selected && styles.selectChipLabelActive]}>
                         {m.name}
                       </Text>

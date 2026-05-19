@@ -5,6 +5,9 @@ import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { colors, font, radius, spacing } from '../../src/ui/tokens';
 import { OnboardingNav } from '../../src/ui/primitives/OnboardingNav';
+import { useAuthStore } from '../../src/store/auth';
+import { useHouseholdStore } from '../../src/store/household';
+import { buildFreshHousehold } from '../../src/domain/factory';
 
 const MOCK_SILOS = [
   { title: 'Reserva de emergência', sub: 'POUPANÇA · HÁ 7D', amount: 'R$ 18.400' },
@@ -14,13 +17,22 @@ const MOCK_SILOS = [
 
 export default function SetupSilosScreen() {
   const { t } = useTranslation();
+  const name = useAuthStore((s) => s.name);
+  const setHouseholdChoice = useAuthStore((s) => s.setHouseholdChoice);
+  const setHousehold = useHouseholdStore((s) => s.setHousehold);
+
+  function handleContinue() {
+    setHouseholdChoice('solo');
+    setHousehold(buildFreshHousehold(name || 'Usuário'));
+    router.push('/(onboarding)/done');
+  }
 
   return (
     <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
       <OnboardingNav
         onBack={() => router.back()}
         step={3}
-        totalSteps={4}
+        totalSteps={3}
         stepLabel={t('onboarding.steps.silos')}
       />
 
@@ -51,7 +63,7 @@ export default function SetupSilosScreen() {
           <Text style={styles.footer}>{t('onboarding.silos.footer')}</Text>
           <Pressable
             style={styles.btn}
-            onPress={() => router.push('/(onboarding)/setup-household')}
+            onPress={handleContinue}
             accessibilityRole="button"
           >
             <Text style={styles.btnLabel}>{t('common.continue')}</Text>

@@ -28,7 +28,8 @@
     "yesterday": "yesterday",
     "perMonth": "/mo",
     "and": "and",
-    "goal": "Goal"
+    "goal": "Goal",
+    "deleteConfirm": "This action cannot be undone."
   },
   "currency": {
     "symbol": "$",
@@ -160,6 +161,7 @@
     }
   },
   "home": {
+    "tabLabel": "Home",
     "freeToSpend": "Free to spend",
     "nextIn": "NEXT IN {{days}}D · {{date}}",
     "daysLeftInMonth": "{{days}}D LEFT IN MONTH",
@@ -168,6 +170,7 @@
     "billsCount": "{{count}} BILLS",
     "inSilos": "In silos",
     "silosCount": "{{count}} SILOS",
+    "paycheckIn": "{{days}} DAYS UNTIL NEXT PAYCHECK BY",
     "comingUp": "Coming up",
     "paidCount": "{{paid}} PAID · {{remaining}} LEFT",
     "seeAll": "See all bills →"
@@ -256,6 +259,10 @@
       "explainer": "This doesn't move any cash. Updating a silo never changes your \"free to spend.\"",
       "save": "Save new value",
       "successFlash": "{{name}} updated to {{value}}"
+    },
+    "confirmDelete": {
+      "title": "Delete silo?",
+      "message": "This action cannot be undone."
     }
   },
   "addSheet": {
@@ -307,15 +314,6 @@
       "successFlashToSilo": "{{value}} moved to {{name}}",
       "successFlashFromSilo": "{{value}} pulled from {{name}}"
     },
-    "income": {
-      "amount": "Amount received",
-      "source": "Source",
-      "sourcePlaceholder": "Bonus, gift, refund…",
-      "whoReceived": "Who received it",
-      "depositedTo": "Deposited into",
-      "submit": "Log income",
-      "successFlash": "Income logged"
-    },
     "newBill": {
       "name": "Name",
       "namePlaceholder": "Electric, gym, school lunch…",
@@ -329,7 +327,33 @@
       "installmentsPlaceholder": "E.g. 12",
       "assignee": "Assigned to",
       "submit": "Add obligation",
+      "save": "Save",
+      "deleteBill": "Delete obligation",
       "successFlash": "Obligation added"
+    },
+    "income": {
+      "newTitle": "New recurring income",
+      "editTitle": "Edit income",
+      "name": "Source",
+      "namePlaceholder": "Salary, freelance, rent…",
+      "amount": "Monthly amount",
+      "schedule": "Frequency",
+      "monthly": "Every month",
+      "split": "2× per month",
+      "biweekly": "Every 2 weeks",
+      "day": "Day {{n}}",
+      "submit": "Add",
+      "save": "Save",
+      "delete": "Delete income",
+      "source": "Source",
+      "sourcePlaceholder": "Bonus, gift, refund…",
+      "whoReceived": "Who received it",
+      "depositedTo": "Deposited into",
+      "successFlash": "Income logged"
+    },
+    "silo": {
+      "save": "Save",
+      "delete": "Delete silo"
     }
   },
   "allowance": {
@@ -409,12 +433,12 @@
   "member": {
     "monthlyIncome": "Monthly income",
     "receivedThisYear": "Received this year",
-    "recurringIncome": "Recurring income",
+    "recurringIncome": "Income",
     "billsAssigned": "Bills assigned",
     "pendingMany": "{{count}} pending bills",
     "pendingOne": "{{count}} pending bill",
     "settled": "All caught up",
-    "emptyIncomes": "No recurring income for {{name}} yet. Tap + Add to set up a salary or regular payment.",
+    "emptyIncomes": "No income logged for {{name}} yet. Tap + to add.",
     "emptyBills": "{{name}} doesn't have any bills assigned yet.",
     "scheduleMonthly": "Every {{day}}",
     "scheduleSplit": "{{d1}} and {{d2}} of every month",
@@ -456,11 +480,34 @@
       "editTitle": "Edit account",
       "newTitle": "New bank account",
       "namePlaceholder": "Chase checking, Wells joint…",
-      "last4": "Last 4 digits",
       "owner": "Owner",
       "addedFlash": "Account added",
       "updatedFlash": "Account updated",
       "removedFlash": "Account removed"
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "profile": {
+      "heading": "Profile",
+      "name": "Name",
+      "email": "Email",
+      "birthdate": "Birthday",
+      "birthdatePlaceholder": "DD/MM/YYYY",
+      "namePlaceholder": "Your name"
+    },
+    "household": {
+      "heading": "Household",
+      "householdName": "Household name",
+      "householdNamePlaceholder": "What do you call home?",
+      "members": "Members",
+      "addMember": "Add member",
+      "memberNamePlaceholder": "Member name",
+      "removeMember": "Remove member",
+      "invite": "Invite members",
+      "inviteSub": "Share an invite code or link",
+      "join": "Join a household",
+      "joinSub": "Use a code someone sent you"
     }
   },
   "errors": {
