@@ -427,7 +427,7 @@ export default function SettingsScreen() {
               <View style={styles.separatorFull} />
               <Pressable
                 style={({ pressed }) => [styles.actionRow, pressed && styles.rowPressed]}
-                onPress={() => router.push('/(onboarding)/setup-household-invite' as never)}
+                onPress={() => router.push('/(onboarding)/setup-household-invite?from=settings' as never)}
               >
                 <View style={styles.actionRowText}>
                   <Text style={styles.actionRowTitle}>{t('settings.household.invite')}</Text>
@@ -440,7 +440,7 @@ export default function SettingsScreen() {
               <View style={styles.separatorFull} />
               <Pressable
                 style={({ pressed }) => [styles.actionRow, pressed && styles.rowPressed]}
-                onPress={() => router.push('/(onboarding)/setup-household-join' as never)}
+                onPress={() => router.push('/(onboarding)/setup-household-join?from=settings' as never)}
               >
                 <View style={styles.actionRowText}>
                   <Text style={styles.actionRowTitle}>{t('settings.household.join')}</Text>

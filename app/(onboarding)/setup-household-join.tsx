@@ -9,7 +9,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { colors, font, radius, spacing } from '../../src/ui/tokens';
 import { OnboardingNav } from '../../src/ui/primitives/OnboardingNav';
@@ -23,8 +23,16 @@ type State = 'idle' | 'found' | 'not-found';
 
 export default function SetupHouseholdJoinScreen() {
   const { t } = useTranslation();
+  const { from } = useLocalSearchParams<{ from?: string }>();
+  const fromSettings = from === 'settings';
+
   const [code, setCode]   = useState('');
   const [state, setState] = useState<State>('idle');
+
+  function handleDone() {
+    if (fromSettings) router.back();
+    else router.replace('/(onboarding)/done');
+  }
 
   function handleLookup() {
     const normalized = code.trim().toUpperCase();
@@ -46,9 +54,7 @@ export default function SetupHouseholdJoinScreen() {
     <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
       <OnboardingNav
         onBack={() => router.back()}
-        step={4}
-        totalSteps={4}
-        stepLabel={t('onboarding.steps.lar')}
+        {...(!fromSettings && { step: 4, totalSteps: 4, stepLabel: t('onboarding.steps.lar') })}
       />
 
       <KeyboardAvoidingView
@@ -97,7 +103,7 @@ export default function SetupHouseholdJoinScreen() {
             {state === 'found' ? (
               <Pressable
                 style={({ pressed }) => [styles.btn, pressed && { opacity: 0.85 }]}
-                onPress={() => router.replace('/(onboarding)/done')}
+                onPress={handleDone}
                 accessibilityRole="button"
               >
                 <Text style={styles.btnLabel}>

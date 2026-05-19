@@ -1,24 +1,28 @@
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { colors, font, radius, spacing } from '../../src/ui/tokens';
 import { OnboardingNav } from '../../src/ui/primitives/OnboardingNav';
 
 // Stage 12 — full invite flow (QR + code + link). Stub for now.
-// "Convido depois" skips ahead to done.
 
 export default function SetupHouseholdInviteScreen() {
   const { t } = useTranslation();
+  const { from } = useLocalSearchParams<{ from?: string }>();
+  const fromSettings = from === 'settings';
+
+  function handleDone() {
+    if (fromSettings) router.back();
+    else router.replace('/(onboarding)/done');
+  }
 
   return (
     <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
       <OnboardingNav
         onBack={() => router.back()}
-        step={4}
-        totalSteps={4}
-        stepLabel={t('onboarding.steps.lar')}
+        {...(!fromSettings && { step: 4, totalSteps: 4, stepLabel: t('onboarding.steps.lar') })}
       />
 
       <View style={styles.container}>
@@ -42,16 +46,14 @@ export default function SetupHouseholdInviteScreen() {
         </View>
 
         <View style={styles.bottom}>
-          <Pressable
-            style={styles.skipLink}
-            onPress={() => router.replace('/(onboarding)/done')}
-          >
-            <Text style={styles.skipText}>{t('onboarding.larInvite.skip')}</Text>
-          </Pressable>
-
+          {!fromSettings && (
+            <Pressable style={styles.skipLink} onPress={handleDone}>
+              <Text style={styles.skipText}>{t('onboarding.larInvite.skip')}</Text>
+            </Pressable>
+          )}
           <Pressable
             style={styles.btn}
-            onPress={() => router.replace('/(onboarding)/done')}
+            onPress={handleDone}
             accessibilityRole="button"
           >
             <Text style={styles.btnLabel}>{t('common.continue')}</Text>
