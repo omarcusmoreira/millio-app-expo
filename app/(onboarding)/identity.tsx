@@ -16,6 +16,7 @@ import type { Colors } from '../../src/ui/tokens';
 import { useColors } from '../../src/ui/theme';
 import { Avatar } from '../../src/ui/primitives';
 import { useHouseholdStore } from '../../src/store/household';
+import { useAuthStore } from '../../src/store/auth';
 import { buildFreshHousehold } from '../../src/domain/factory';
 import { OnboardingNav } from '../../src/ui/primitives/OnboardingNav';
 
@@ -24,6 +25,8 @@ export default function OnboardingIdentityScreen() {
   const colors = useColors();
   const styles = makeStyles(colors);
   const setHousehold = useHouseholdStore((s) => s.setHousehold);
+  const setAuthName = useAuthStore((s) => s.setName);
+  const setCurrentMemberId = useAuthStore((s) => s.setCurrentMemberId);
   const [name, setName] = useState('');
 
   const canContinue = name.trim().length > 0;
@@ -31,7 +34,11 @@ export default function OnboardingIdentityScreen() {
 
   function handleContinue() {
     if (!canContinue) return;
-    setHousehold(buildFreshHousehold(name.trim()));
+    const trimmed = name.trim();
+    const h = buildFreshHousehold(trimmed);
+    setHousehold(h);
+    setAuthName(trimmed);
+    setCurrentMemberId(h.members[0]!.id);
     router.push('/(onboarding)/setup-bills');
   }
 

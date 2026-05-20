@@ -9,14 +9,13 @@ import { useColors } from '../../src/ui/theme';
 import { OnboardingNav } from '../../src/ui/primitives/OnboardingNav';
 import { useAuthStore } from '../../src/store/auth';
 import { useHouseholdStore } from '../../src/store/household';
-import { buildFreshHousehold } from '../../src/domain/factory';
 
 export default function SetupHouseholdNameScreen() {
   const { t } = useTranslation();
   const colors = useColors();
   const styles = makeStyles(colors);
-  const { name: memberName } = useAuthStore();
-  const setHousehold = useHouseholdStore((s) => s.setHousehold);
+  const memberName = useAuthStore((s) => s.name);
+  const updateHouseholdName = useHouseholdStore((s) => s.updateHouseholdName);
 
   const defaultName = t('onboarding.larName.placeholder', {
     lastname: memberName || t('onboarding.larName.defaultLastname'),
@@ -24,8 +23,7 @@ export default function SetupHouseholdNameScreen() {
   const [householdName, setHouseholdNameValue] = useState('');
 
   const handleContinue = (nameToUse: string) => {
-    const h = buildFreshHousehold(memberName || 'Usuário');
-    setHousehold({ ...h, name: nameToUse });
+    updateHouseholdName(nameToUse);
     router.push('/(onboarding)/setup-household-invite' as never);
   };
 

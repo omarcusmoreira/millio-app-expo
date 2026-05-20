@@ -8,19 +8,15 @@ import type { Colors } from '../../src/ui/tokens';
 import { useColors } from '../../src/ui/theme';
 import { OnboardingNav } from '../../src/ui/primitives/OnboardingNav';
 import { useAuthStore } from '../../src/store/auth';
-import { useHouseholdStore } from '../../src/store/household';
-import { buildFreshHousehold } from '../../src/domain/factory';
 
 export default function SetupHouseholdScreen() {
   const { t } = useTranslation();
   const colors = useColors();
   const styles = makeStyles(colors);
-  const { name, setHouseholdChoice } = useAuthStore();
-  const setHousehold = useHouseholdStore((s) => s.setHousehold);
+  const setHouseholdChoice = useAuthStore((s) => s.setHouseholdChoice);
 
   const handleSolo = () => {
     setHouseholdChoice('solo');
-    setHousehold(buildFreshHousehold(name || 'Usuário'));
     router.push('/(onboarding)/done');
   };
 
