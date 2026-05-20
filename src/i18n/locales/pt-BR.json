@@ -173,7 +173,8 @@
     "paycheckIn": "{{days}} DIAS ATÉ O PRÓXIMO PAGAMENTO DE",
     "comingUp": "Próximas",
     "paidCount": "{{paid}} PAGAS · {{remaining}} A PAGAR",
-    "seeAll": "Ver todas as contas →"
+    "seeAll": "Ver todas as contas →",
+    "recentExpenses": "Despesas recentes"
   },
   "bills": {
     "tabLabel": "Contas",
@@ -233,6 +234,7 @@
   "silos": {
     "tabLabel": "Silos",
     "title": "Silos",
+    "empty": "Nenhum silo ainda.",
     "notSpendable": "NÃO GASTÁVEL",
     "totalStored": "Total armazenado",
     "summary": "{{count}} SILOS · VALORES MANUAIS",

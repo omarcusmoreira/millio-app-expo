@@ -157,7 +157,8 @@ export const weeklySpent = (h: Household): number => {
   return h.transactions
     .filter(
       (t) =>
-        t.kind === 'allowance-spend' && t.date >= start && t.date < end,
+        (t.kind === 'expense' || t.kind === 'allowance-spend') &&
+        t.date >= start && t.date < end,
     )
     .reduce((s, t) => s + t.amount, 0);
 };

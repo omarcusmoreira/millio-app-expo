@@ -173,7 +173,8 @@
     "paycheckIn": "{{days}} DAYS UNTIL NEXT PAYCHECK BY",
     "comingUp": "Coming up",
     "paidCount": "{{paid}} PAID · {{remaining}} LEFT",
-    "seeAll": "See all bills →"
+    "seeAll": "See all bills →",
+    "recentExpenses": "Recent expenses"
   },
   "bills": {
     "tabLabel": "Bills",
@@ -233,6 +234,7 @@
   "silos": {
     "tabLabel": "Silos",
     "title": "Silos",
+    "empty": "No silos yet.",
     "notSpendable": "NOT SPENDABLE",
     "totalStored": "Total stored",
     "summary": "{{count}} SILOS · MANUAL VALUES",

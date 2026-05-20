@@ -4,7 +4,7 @@ import type { Bill } from '../../src/domain/entities';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useColors } from '../../src/ui/theme';
-import { font, spacing } from '../../src/ui/tokens';
+import { font, radius, spacing } from '../../src/ui/tokens';
 import type { Colors } from '../../src/ui/tokens';
 import { MemberAvatar, Money } from '../../src/ui/primitives';
 import { useHouseholdStore } from '../../src/store/household';
@@ -73,6 +73,12 @@ export default function HomeScreen() {
   const silosCount = household ? household.silos.length : 0;
 
   const categories = household?.categories ?? [];
+
+  // Recent expenses — kind 'expense', sorted newest first, capped at 5
+  const recentExpenses = (household?.transactions ?? [])
+    .filter((t) => t.kind === 'expense')
+    .sort((a, b) => b.date.localeCompare(a.date))
+    .slice(0, 5);
 
   // Upcoming bills — show first 4 unpaid
   const upcomingBills = pendingList.slice(0, 4);
@@ -143,6 +149,33 @@ export default function HomeScreen() {
         <View style={styles.cardSection}>
           <AllowanceCard />
         </View>
+
+        {/* ── Recent expenses ── */}
+        {recentExpenses.length > 0 && (
+          <View style={styles.expensesSection}>
+            <Text style={styles.sectionTitle}>{t('home.recentExpenses')}</Text>
+            <View style={styles.expensesList}>
+              {recentExpenses.map((tx, i) => {
+                const member = household?.members.find((m) => m.id === tx.byMemberId);
+                return (
+                  <React.Fragment key={tx.id}>
+                    {i > 0 && <View style={styles.rowDivider} />}
+                    <View style={styles.expenseRow}>
+                      <View style={styles.expenseInfo}>
+                        <Text style={styles.expenseName}>{tx.name}</Text>
+                        <Text style={styles.expenseDate}>{tx.date}</Text>
+                      </View>
+                      <View style={styles.expenseRight}>
+                        <Money value={-tx.amount} variant="inline" color={colors.ink[1]} />
+                        {member && <MemberAvatar member={member} size="sm" />}
+                      </View>
+                    </View>
+                  </React.Fragment>
+                );
+              })}
+            </View>
+          </View>
+        )}
 
         {/* ── Upcoming bills ── */}
         {upcomingBills.length > 0 && (
@@ -275,6 +308,50 @@ const makeStyles = (colors: Colors) => StyleSheet.create({
   cardSection: {
     paddingHorizontal: spacing[7],
     marginBottom: spacing[6],
+  },
+
+  // Expenses
+  expensesSection: {
+    paddingHorizontal: spacing[7],
+    marginBottom: spacing[6],
+  },
+  sectionTitle: {
+    fontFamily: font.family.sans,
+    fontWeight: font.weight.medium,
+    fontSize: font.size.hSection,
+    color: colors.ink[1],
+    marginBottom: spacing[4],
+  },
+  expensesList: {
+    backgroundColor: colors.background.surface,
+    borderRadius: radius.large,
+    borderWidth: 1,
+    borderColor: colors.border.default,
+    overflow: 'hidden',
+  },
+  expenseRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: spacing[6],
+    paddingVertical: spacing[5],
+    gap: spacing[4],
+  },
+  expenseInfo: { flex: 1, gap: spacing[1] },
+  expenseName: {
+    fontFamily: font.family.sans,
+    fontSize: font.size.body,
+    color: colors.ink[1],
+  },
+  expenseDate: {
+    fontFamily: font.family.mono,
+    fontSize: font.size.mono,
+    color: colors.ink[4],
+    letterSpacing: font.letterSpacing.eyebrow,
+  },
+  expenseRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing[3],
   },
 
   // Upcoming
