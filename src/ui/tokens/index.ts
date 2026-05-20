@@ -1,4 +1,4 @@
-export const colors = {
+export const lightColors = {
   background: {
     page: '#FBFBFA',
     surface: '#FFFFFF',
@@ -31,6 +31,43 @@ export const colors = {
     grey: { bg: '#998C7A', fg: '#FBF8F3' },
   },
 } as const;
+
+export const darkColors = {
+  background: {
+    page: '#0F0E0D',
+    surface: '#1C1A18',
+    surfaceSoft: '#242220',
+    keyboardChip: '#2A2826',
+  },
+  border: {
+    default: '#2E2C2A',
+    emphasis: '#3A3836',
+    divider: '#232120',
+  },
+  ink: {
+    1: '#F0EDE8',
+    2: '#C4C0BB',
+    3: '#8A8680',
+    4: '#5C5A56',
+  },
+  brand: {
+    terracotta: '#C26B4D',
+    terracottaPressed: '#A85638',
+    terracottaSoft: '#3A2520',
+  },
+  semantic: {
+    olive: '#6F7A4F',
+    warmGrey: '#998C7A',
+  },
+  avatar: {
+    terracotta: { bg: '#C26B4D', fg: '#FBF8F3' },
+    olive: { bg: '#6F7A4F', fg: '#FBF8F3' },
+    grey: { bg: '#998C7A', fg: '#FBF8F3' },
+  },
+} as const;
+
+// Backward-compat alias — components should use useColors() from src/ui/theme instead
+export const colors = lightColors;
 
 export const font = {
   family: {

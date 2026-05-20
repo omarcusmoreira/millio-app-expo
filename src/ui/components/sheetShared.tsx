@@ -94,10 +94,12 @@ export function DueDatePicker({
     scrollRef.current.scrollTo({ x: offset, animated: false });
   };
 
+  // Only re-center when the visible month changes, not when the user taps a day
   useEffect(() => {
     const id = setTimeout(() => scrollToDay(centerDay), 50);
     return () => clearTimeout(id);
-  }, [viewYear, viewMonth, centerDay]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [viewYear, viewMonth]);
 
   return (
     <View style={dp.container}>

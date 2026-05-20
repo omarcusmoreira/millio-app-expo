@@ -3,9 +3,7 @@ import {
   Animated,
   Dimensions,
   Easing,
-  KeyboardAvoidingView,
   Modal,
-  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -95,14 +93,12 @@ export function Sheet({
         />
       </Animated.View>
 
-      {/* KAV owns the full height so it can push the panel up when the keyboard appears */}
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.kavContainer}
+      <Animated.View
+        style={[styles.panelWrapper, { transform: [{ translateY }] }]}
         pointerEvents="box-none"
       >
         <Animated.View
-          style={[styles.panel, { transform: [{ translateY }] }]}
+          style={styles.panel}
           accessibilityRole="none"
           aria-modal
         >
@@ -134,6 +130,7 @@ export function Sheet({
             ]}
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}
+            automaticallyAdjustKeyboardInsets
           >
             {children}
           </ScrollView>
@@ -145,7 +142,7 @@ export function Sheet({
             </View>
           )}
         </Animated.View>
-      </KeyboardAvoidingView>
+      </Animated.View>
     </Modal>
   );
 }
@@ -155,9 +152,11 @@ const makeStyles = (colors: Colors) => StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     backgroundColor: '#000',
   },
-  kavContainer: {
-    flex: 1,
-    justifyContent: 'flex-end',
+  panelWrapper: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
   },
   panel: {
     backgroundColor: colors.background.surface,

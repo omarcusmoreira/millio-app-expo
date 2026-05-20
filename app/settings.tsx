@@ -5,13 +5,14 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
+  Switch,
   Text,
   TextInput,
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { ChevronLeft, ChevronRight, Pencil, Trash2, Plus } from 'lucide-react-native';
+import { ChevronLeft, ChevronRight, Moon, Pencil, Sun, Trash2, Plus } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../src/store/auth';
 import { useHouseholdStore } from '../src/store/household';
@@ -174,16 +175,23 @@ export default function SettingsScreen() {
 
   function saveProfile() {
     const v = profileDraft.trim();
-    if (editingProfileField === 'name' && v) setAuthName(v);
-    else if (editingProfileField === 'email' && v) setAuthEmail(v);
-    else if (editingProfileField === 'birthdate') setBirthdate(v);
+    if (editingProfileField === 'name' && v) {
+      setAuthName(v);
+      const me = household?.members.find((m) => m.id === currentMemberId);
+      if (me) updateMember(currentMemberId, { name: v, color: me.color });
+    } else if (editingProfileField === 'email' && v) {
+      setAuthEmail(v);
+    } else if (editingProfileField === 'birthdate') {
+      setBirthdate(v);
+    }
     setEditingProfileField(null);
   }
 
   // ── Household ──
   const household           = useHouseholdStore((s) => s.household);
   const updateHouseholdName = useHouseholdStore((s) => s.updateHouseholdName);
-  const removeMember = useHouseholdStore((s) => s.removeMember);
+  const updateMember        = useHouseholdStore((s) => s.updateMember);
+  const removeMember        = useHouseholdStore((s) => s.removeMember);
 
   const [editingHouseholdName, setEditingHouseholdName] = useState(false);
   const [householdNameDraft,   setHouseholdNameDraft]   = useState('');
@@ -640,20 +648,30 @@ export default function SettingsScreen() {
           <View style={styles.section}>
             <SectionHeader label={t('settings.appearance.heading')} />
             <View style={styles.card}>
-              {(['system', 'light', 'dark'] as ThemePreference[]).map((option, idx) => (
-                <View key={option}>
-                  {idx > 0 && <View style={styles.separatorFull} />}
-                  <Pressable
-                    style={({ pressed }) => [styles.themeRow, pressed && styles.rowPressed]}
-                    onPress={() => setPreference(option)}
-                    accessibilityRole="radio"
-                    accessibilityState={{ checked: preference === option }}
-                  >
-                    <Text style={styles.themeLabel}>{t(`settings.appearance.${option}`)}</Text>
-                    <View style={[styles.themeRadio, preference === option && styles.themeRadioSelected]} />
-                  </Pressable>
-                </View>
-              ))}
+              <View style={styles.themeRow}>
+                <Text style={styles.themeLabel}>{t('settings.appearance.system')}</Text>
+                <Switch
+                  value={preference === 'system'}
+                  onValueChange={(on) => setPreference(on ? 'system' : 'light')}
+                  trackColor={{ false: colors.border.emphasis, true: colors.brand.terracotta }}
+                  thumbColor={colors.background.surface}
+                />
+              </View>
+              {preference !== 'system' && (
+                <>
+                  <View style={styles.separatorFull} />
+                  <View style={styles.themeIconRow}>
+                    <Sun size={18} color={preference === 'light' ? colors.brand.terracotta : colors.ink[4]} strokeWidth={1.6} />
+                    <Switch
+                      value={preference === 'dark'}
+                      onValueChange={(on) => setPreference(on ? 'dark' : 'light')}
+                      trackColor={{ false: colors.border.emphasis, true: colors.border.emphasis }}
+                      thumbColor={colors.brand.terracotta}
+                    />
+                    <Moon size={18} color={preference === 'dark' ? colors.brand.terracotta : colors.ink[4]} strokeWidth={1.6} />
+                  </View>
+                </>
+              )}
             </View>
           </View>
 
@@ -903,26 +921,23 @@ const makeStyles = (colors: Colors) => StyleSheet.create({
   themeRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     paddingHorizontal: spacing[5],
     paddingVertical: spacing[5],
     gap: spacing[4],
+  },
+  themeIconRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: spacing[5],
+    paddingVertical: spacing[5],
+    gap: spacing[5],
   },
   themeLabel: {
     flex: 1,
     fontFamily: font.family.sans,
     fontSize: font.size.body,
     color: colors.ink[1],
-  },
-  themeRadio: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    borderWidth: 2,
-    borderColor: colors.border.emphasis,
-    backgroundColor: 'transparent',
-  },
-  themeRadioSelected: {
-    borderColor: colors.brand.terracotta,
-    backgroundColor: colors.brand.terracotta,
   },
 });

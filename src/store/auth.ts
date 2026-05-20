@@ -1,4 +1,6 @@
 import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export type AuthMethod = 'apple' | 'google' | 'email';
 export type Intent = 'create' | 'signin';
@@ -35,15 +37,33 @@ const initial = {
   householdChoice: null as HouseholdChoice | null,
 };
 
-export const useAuthStore = create<AuthState>((set) => ({
-  ...initial,
-  setIntent: (intent) => set({ intent }),
-  setAuthMethod: (authMethod) => set({ authMethod }),
-  setName: (name) => set({ name }),
-  setEmail: (email) => set({ email }),
-  setBirthdate: (birthdate) => set({ birthdate }),
-  setCurrentMemberId: (currentMemberId) => set({ currentMemberId }),
-  setAvatarColor: (avatarColor) => set({ avatarColor }),
-  setHouseholdChoice: (householdChoice) => set({ householdChoice }),
-  reset: () => set(initial),
-}));
+export const useAuthStore = create<AuthState>()(
+  persist(
+    (set) => ({
+      ...initial,
+      setIntent: (intent) => set({ intent }),
+      setAuthMethod: (authMethod) => set({ authMethod }),
+      setName: (name) => set({ name }),
+      setEmail: (email) => set({ email }),
+      setBirthdate: (birthdate) => set({ birthdate }),
+      setCurrentMemberId: (currentMemberId) => set({ currentMemberId }),
+      setAvatarColor: (avatarColor) => set({ avatarColor }),
+      setHouseholdChoice: (householdChoice) => set({ householdChoice }),
+      reset: () => set(initial),
+    }),
+    {
+      name: 'milio-auth',
+      storage: createJSONStorage(() => AsyncStorage),
+      partialize: (s) => ({
+        intent: s.intent,
+        name: s.name,
+        email: s.email,
+        birthdate: s.birthdate,
+        currentMemberId: s.currentMemberId,
+        avatarColor: s.avatarColor,
+        authMethod: s.authMethod,
+        householdChoice: s.householdChoice,
+      }),
+    }
+  )
+);

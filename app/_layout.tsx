@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { View } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { AppState, View } from 'react-native';
 import { Stack } from 'expo-router';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useFonts } from 'expo-font';
@@ -8,12 +8,18 @@ import { Inter_400Regular, Inter_500Medium } from '@expo-google-fonts/inter';
 import { JetBrainsMono_400Regular } from '@expo-google-fonts/jetbrains-mono';
 import * as SplashScreen from 'expo-splash-screen';
 import '../src/i18n';
-import { colors } from '../src/ui/tokens';
+import { ThemeProvider, useColors } from '../src/ui/theme';
+import { useHouseholdStore } from '../src/store/household';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
-export default function RootLayout() {
+const todayISO = () => new Date().toISOString().slice(0, 10);
+
+function AppShell() {
+  const colors = useColors();
+  const setToday = useHouseholdStore((s) => s.setToday);
   const [ready, setReady] = useState(false);
+  const appState = useRef(AppState.currentState);
 
   const [fontsLoaded, fontError] = useFonts({
     Fraunces: Fraunces_400Regular,
@@ -22,13 +28,24 @@ export default function RootLayout() {
     JetBrainsMono: JetBrainsMono_400Regular,
   });
 
+  // Refresh today whenever the app comes back to the foreground
+  useEffect(() => {
+    setToday(todayISO());
+    const sub = AppState.addEventListener('change', (next) => {
+      if (appState.current !== 'active' && next === 'active') {
+        setToday(todayISO());
+      }
+      appState.current = next;
+    });
+    return () => sub.remove();
+  }, [setToday]);
+
   useEffect(() => {
     if (fontsLoaded || fontError) {
       SplashScreen.hideAsync().catch(() => {});
       setReady(true);
       return;
     }
-    // Hard timeout: never stay on splash > 3s
     const t = setTimeout(() => {
       SplashScreen.hideAsync().catch(() => {});
       setReady(true);
@@ -37,7 +54,6 @@ export default function RootLayout() {
   }, [fontsLoaded, fontError]);
 
   if (!ready) {
-    // Blank canvas — same color as splash background so there's no flash
     return <View style={{ flex: 1, backgroundColor: colors.background.page }} />;
   }
 
@@ -51,5 +67,13 @@ export default function RootLayout() {
         <Stack.Screen name="member/[id]" />
       </Stack>
     </SafeAreaProvider>
+  );
+}
+
+export default function RootLayout() {
+  return (
+    <ThemeProvider>
+      <AppShell />
+    </ThemeProvider>
   );
 }

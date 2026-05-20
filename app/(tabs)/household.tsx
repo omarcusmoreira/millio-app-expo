@@ -210,7 +210,14 @@ function MemberPanel({ member }: MemberPanelProps) {
 
           {/* Accounts */}
           <View style={styles.section}>
-            <Text style={styles.sectionEyebrowPad}>{t('lar.setupItems.accounts').toUpperCase()}</Text>
+            <View style={styles.sectionTitleRow}>
+              <Text style={styles.sectionEyebrow}>{t('lar.setupItems.accounts').toUpperCase()}</Text>
+              {!addingAccount && (
+                <Pressable hitSlop={8} onPress={() => setAddingAccount(true)}>
+                  <Plus size={16} color={colors.ink[3]} strokeWidth={2} />
+                </Pressable>
+              )}
+            </View>
             <View style={styles.card}>
               {accounts.map((account, idx) => (
                 <View key={account.id}>
@@ -259,7 +266,7 @@ function MemberPanel({ member }: MemberPanelProps) {
                   )}
                 </View>
               ))}
-              {addingAccount ? (
+              {addingAccount && (
                 <>
                   {accounts.length > 0 && <View style={styles.separator} />}
                   <View style={styles.editForm}>
@@ -283,17 +290,6 @@ function MemberPanel({ member }: MemberPanelProps) {
                       </Pressable>
                     </View>
                   </View>
-                </>
-              ) : (
-                <>
-                  {accounts.length > 0 && <View style={styles.separator} />}
-                  <Pressable
-                    style={({ pressed }) => [styles.addRow, pressed && { opacity: 0.6 }]}
-                    onPress={() => setAddingAccount(true)}
-                  >
-                    <Plus size={14} color={colors.brand.terracotta} strokeWidth={2.5} />
-                    <Text style={styles.addLabel}>{t('setup.accounts.newBtn')}</Text>
-                  </Pressable>
                 </>
               )}
             </View>

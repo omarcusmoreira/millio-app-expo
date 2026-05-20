@@ -1,4 +1,6 @@
 import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { monotonicFactory } from 'ulid';
 const ulid = monotonicFactory(Math.random);
 import type { Bill, CashAccount, Category, ColorToken, Household, Income, Label, Member, Silo, Transaction } from '../domain/entities';
@@ -75,12 +77,31 @@ interface HouseholdState {
 
 const todayISO = (): string => new Date().toISOString().slice(0, 10);
 
-export const useHouseholdStore = create<HouseholdState>((set, get) => ({
+function currentWeekMonday(isoDate: string): string {
+  const d = new Date(isoDate + 'T00:00:00Z');
+  const day = d.getUTCDay(); // 0=Sun
+  const diff = day === 0 ? -6 : 1 - day;
+  d.setUTCDate(d.getUTCDate() + diff);
+  return d.toISOString().slice(0, 10);
+}
+
+export const useHouseholdStore = create<HouseholdState>()(
+  persist(
+  (set, get) => ({
   household: null,
   today: todayISO(),
 
   setHousehold: (h) => set({ household: h }),
-  setToday: (today) => set({ today }),
+  setToday: (today) => {
+    const { household } = get();
+    if (!household) { set({ today }); return; }
+    const monday = currentWeekMonday(today);
+    if (monday !== household.allowance.weekStart) {
+      set({ today, household: { ...household, allowance: { ...household.allowance, weekStart: monday } } });
+    } else {
+      set({ today });
+    }
+  },
 
   addBill: (draft) => {
     const { household, today } = get();
@@ -343,4 +364,10 @@ export const useHouseholdStore = create<HouseholdState>((set, get) => ({
     const { household, today } = get();
     return household ? daysUntilPaycheck(household, today) : 30;
   },
-}));
+  }),
+  {
+    name: 'milio-household',
+    storage: createJSONStorage(() => AsyncStorage),
+    partialize: (s) => ({ household: s.household, today: s.today }),
+  }
+));
