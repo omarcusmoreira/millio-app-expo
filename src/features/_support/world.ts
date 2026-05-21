@@ -1,7 +1,7 @@
 // _support/world.ts — Shared test context for all Gherkin steps.
 // Implementation skeleton; complete in target codebase.
 
-import type { Household, Bill, Silo, Member, Income, Transaction } from '@/domain/types';
+import type { Household, Expense, Silo, Member, Income, Transaction } from '@/domain/types';
 
 export interface World {
   /** ISO date "today" — overridable per scenario via `Given today is "YYYY-MM-DD"`. */
@@ -36,8 +36,7 @@ export const emptyHousehold = (): Household => ({
   name: null,
   ownerId: '',
   members: [], cashAccounts: [], categories: [], labels: [],
-  bills: [], silos: [], incomes: [], transactions: [],
-  allowance: { weekStart: '2026-05-11', override: null },
+  expenses: [], silos: [], incomes: [], transactions: [],
   locale: 'pt-BR',
   createdAt: '2026-05-01T00:00:00Z',
 });

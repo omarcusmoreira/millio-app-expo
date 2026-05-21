@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import type { Bill } from '../../src/domain/entities';
+import type { Expense } from '../../src/domain/entities';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useColors } from '../../src/ui/theme';
@@ -13,12 +13,12 @@ import {
   daysBetween,
   freeToSpend as computeFreeToSpend,
   nextPaycheck,
-  pendingBills,
-  totalPending,
+  totalPendingThisMonth,
+  upcomingOccurrences,
 } from '../../src/domain/selectors';
 import { AllowanceCard } from '../../src/ui/components/AllowanceCard';
-import { SwipeableBillItem } from '../../src/ui/components/SwipeableBillItem';
-import { NewBillSheet } from '../../src/ui/components/NewBillSheet';
+import { SwipeableExpenseItem } from '../../src/ui/components/SwipeableExpenseItem';
+import { NewExpenseSheet } from '../../src/ui/components/NewExpenseSheet';
 import { ConfirmModal } from '../../src/ui/components/ConfirmModal';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -44,15 +44,16 @@ export default function HomeScreen() {
   const styles = makeStyles(colors);
   const household = useHouseholdStore((s) => s.household);
   const today = useHouseholdStore((s) => s.today);
-  const updateBill = useHouseholdStore((s) => s.updateBill);
-  const deleteBill = useHouseholdStore((s) => s.deleteBill);
-  const [editBill, setEditBill] = useState<Bill | null>(null);
-  const [deletingBill, setDeletingBill] = useState<Bill | null>(null);
+  const updateExpense = useHouseholdStore((s) => s.updateExpense);
+  const deleteExpense = useHouseholdStore((s) => s.deleteExpense);
+  const markExpensePaid = useHouseholdStore((s) => s.markExpensePaid);
+  const [editExpense, setEditExpense] = useState<Expense | null>(null);
+  const [deletingExpense, setDeletingExpense] = useState<Expense | null>(null);
 
   const freeValue = household ? computeFreeToSpend(household, today) : 0;
-  const overdrawn = household
-    ? totalPending(household) > cashOnHand(household, today)
-    : false;
+  const pendingThisMonth = household ? totalPendingThisMonth(household, today) : 0;
+  const cash = household ? cashOnHand(household, today) : 0;
+  const overdrawn = pendingThisMonth > cash;
 
   // Next paycheck info
   const paycheckInfo = household ? nextPaycheck(household, today) : null;
@@ -60,13 +61,10 @@ export default function HomeScreen() {
     ? Math.max(0, daysBetween(today, paycheckInfo.date))
     : null;
   const paycheckMember = paycheckInfo
-    ? household?.members.find((m) => m.id === paycheckInfo.income.memberId)
+    ? household?.members.find((m) => m.id === paycheckInfo.memberId)
     : null;
 
   // Chips data
-  const pending = household ? totalPending(household) : 0;
-  const pendingList = household ? pendingBills(household) : [];
-  const pendingCount = pendingList.length;
   const silosTotal = household
     ? household.silos.reduce((s, silo) => s + silo.value, 0)
     : 0;
@@ -74,38 +72,44 @@ export default function HomeScreen() {
 
   const categories = household?.categories ?? [];
 
-  // Recent expenses — kind 'expense', sorted newest first, capped at 5
-  const recentExpenses = (household?.transactions ?? [])
-    .filter((t) => t.kind === 'expense')
-    .sort((a, b) => b.date.localeCompare(a.date))
-    .slice(0, 5);
+  // Upcoming occurrences — pending recurring expenses projected into individual date rows
+  const recurringRows = household ? upcomingOccurrences(household, today, 8) : [];
 
-  // Upcoming bills — show first 4 unpaid
-  const upcomingBills = pendingList.slice(0, 4);
-  const paidBills = household
-    ? household.bills.filter((b) => b.paidAt != null)
+  // One-time expenses from the current month (already paid, show as recent)
+  const [todayYear, todayMonth] = today.split('-').map(Number) as [number, number];
+  const monthPrefix = `${todayYear}-${String(todayMonth).padStart(2, '0')}`;
+  const oneTimeRows: Array<{ expense: Expense; date: string }> = household
+    ? household.expenses
+        .filter((e) => e.recurring === 'one-time' && e.date.startsWith(monthPrefix))
+        .map((e) => ({ expense: e, date: e.date }))
     : [];
-  const paidCount = paidBills.length;
-  const remainingCount = pendingCount;
+
+  const allRows = [...recurringRows, ...oneTimeRows].sort((a, b) => a.date.localeCompare(b.date));
+  const upcomingExpenses = allRows.slice(0, 4);
+  const paidExpenses = household
+    ? household.expenses.filter((e) => e.paidAt != null)
+    : [];
+  const paidCount = paidExpenses.length;
+  const remainingCount = allRows.length;
 
   return (
     <View style={styles.safe}>
-      <NewBillSheet
-        open={editBill !== null}
-        bill={editBill ?? undefined}
-        onClose={() => setEditBill(null)}
+      <NewExpenseSheet
+        open={editExpense !== null}
+        expense={editExpense ?? undefined}
+        onClose={() => setEditExpense(null)}
       />
       <ConfirmModal
-        visible={deletingBill !== null}
-        title={t('addSheet.newBill.deleteBill')}
+        visible={deletingExpense !== null}
+        title={t('bills.deleteExpense')}
         message={t('common.deleteConfirm')}
-        confirmLabel={t('addSheet.newBill.deleteBill')}
+        confirmLabel={t('bills.deleteExpense')}
         cancelLabel={t('common.cancel')}
         onConfirm={() => {
-          if (deletingBill) deleteBill(deletingBill.id);
-          setDeletingBill(null);
+          if (deletingExpense) deleteExpense(deletingExpense.id);
+          setDeletingExpense(null);
         }}
-        onCancel={() => setDeletingBill(null)}
+        onCancel={() => setDeletingExpense(null)}
       />
       <ScrollView
         style={styles.scroll}
@@ -134,8 +138,8 @@ export default function HomeScreen() {
         <View style={styles.statsRow}>
           <View style={styles.statCol}>
             <Text style={styles.chipEyebrow}>{t('home.pendingThisMonth')}</Text>
-            <Text style={styles.chipValue}>{formatBRL(pending)}</Text>
-            <Text style={styles.chipSub}>{t('home.billsCount', { count: pendingCount })}</Text>
+            <Text style={styles.chipValue}>{formatBRL(pendingThisMonth)}</Text>
+            <Text style={styles.chipSub}>{t('home.billsCount', { count: allRows.length })}</Text>
           </View>
           <View style={styles.statDivider} />
           <View style={styles.statCol}>
@@ -150,35 +154,8 @@ export default function HomeScreen() {
           <AllowanceCard />
         </View>
 
-        {/* ── Recent expenses ── */}
-        {recentExpenses.length > 0 && (
-          <View style={styles.expensesSection}>
-            <Text style={styles.sectionTitle}>{t('home.recentExpenses')}</Text>
-            <View style={styles.expensesList}>
-              {recentExpenses.map((tx, i) => {
-                const member = household?.members.find((m) => m.id === tx.byMemberId);
-                return (
-                  <React.Fragment key={tx.id}>
-                    {i > 0 && <View style={styles.rowDivider} />}
-                    <View style={styles.expenseRow}>
-                      <View style={styles.expenseInfo}>
-                        <Text style={styles.expenseName}>{tx.name}</Text>
-                        <Text style={styles.expenseDate}>{tx.date}</Text>
-                      </View>
-                      <View style={styles.expenseRight}>
-                        <Money value={-tx.amount} variant="inline" color={colors.ink[1]} />
-                        {member && <MemberAvatar member={member} size="sm" />}
-                      </View>
-                    </View>
-                  </React.Fragment>
-                );
-              })}
-            </View>
-          </View>
-        )}
-
-        {/* ── Upcoming bills ── */}
-        {upcomingBills.length > 0 && (
+        {/* ── Upcoming recurring expenses ── */}
+        {upcomingExpenses.length > 0 && (
           <View style={styles.upcomingSection}>
             <View style={styles.upcomingHeader}>
               <Text style={styles.upcomingTitle}>{t('home.comingUp')}</Text>
@@ -189,28 +166,32 @@ export default function HomeScreen() {
                 })}
               </Text>
             </View>
-            {upcomingBills.map((bill, i) => {
-              const assignee = household?.members.find((m) => m.id === bill.assigneeId);
+            {upcomingExpenses.map(({ expense, date }, i) => {
+              const assignee = household?.members.find((m) => m.id === expense.assigneeId);
+              const displayExpense = expense.date === date
+                ? expense
+                : { ...expense, date, paidAt: null, paidAmount: null };
               return (
-                <React.Fragment key={bill.id}>
+                <React.Fragment key={`${expense.id}_${date}`}>
                   {i > 0 && <View style={styles.rowDivider} />}
-                  <SwipeableBillItem
-                    bill={bill}
+                  <SwipeableExpenseItem
+                    expense={displayExpense}
                     categories={categories}
                     today={today}
                     assignee={assignee}
-                    onEdit={() => setEditBill(bill)}
-                    onPay={() => bill.paidAt
-                      ? updateBill(bill.id, { paidAt: null, paidAmount: null, paidFromAccountId: null })
-                      : updateBill(bill.id, { paidAt: today, paidAmount: bill.amount ?? bill.estimate ?? 0, paidFromAccountId: null })
-                    }
-                    onDelete={() => setDeletingBill(bill)}
+                    onEdit={() => setEditExpense(expense)}
+                    onPay={expense.recurring !== 'one-time' ? () =>
+                      expense.paidAt
+                        ? updateExpense(expense.id, { paidAt: null, paidAmount: null })
+                        : markExpensePaid(expense.id)
+                      : undefined}
+                    onDelete={() => setDeletingExpense(expense)}
                   />
                 </React.Fragment>
               );
             })}
-            {pendingCount > 4 && (
-              <Pressable onPress={() => router.push('/(tabs)/bills')}>
+            {remainingCount > 4 && (
+              <Pressable onPress={() => router.push('/(tabs)/expenses')}>
                 <Text style={styles.seeAll}>{t('home.seeAll')}</Text>
               </Pressable>
             )}
@@ -308,50 +289,6 @@ const makeStyles = (colors: Colors) => StyleSheet.create({
   cardSection: {
     paddingHorizontal: spacing[7],
     marginBottom: spacing[6],
-  },
-
-  // Expenses
-  expensesSection: {
-    paddingHorizontal: spacing[7],
-    marginBottom: spacing[6],
-  },
-  sectionTitle: {
-    fontFamily: font.family.sans,
-    fontWeight: font.weight.medium,
-    fontSize: font.size.hSection,
-    color: colors.ink[1],
-    marginBottom: spacing[4],
-  },
-  expensesList: {
-    backgroundColor: colors.background.surface,
-    borderRadius: radius.large,
-    borderWidth: 1,
-    borderColor: colors.border.default,
-    overflow: 'hidden',
-  },
-  expenseRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: spacing[6],
-    paddingVertical: spacing[5],
-    gap: spacing[4],
-  },
-  expenseInfo: { flex: 1, gap: spacing[1] },
-  expenseName: {
-    fontFamily: font.family.sans,
-    fontSize: font.size.body,
-    color: colors.ink[1],
-  },
-  expenseDate: {
-    fontFamily: font.family.mono,
-    fontSize: font.size.mono,
-    color: colors.ink[4],
-    letterSpacing: font.letterSpacing.eyebrow,
-  },
-  expenseRight: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing[3],
   },
 
   // Upcoming

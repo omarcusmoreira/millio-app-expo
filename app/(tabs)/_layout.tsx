@@ -71,7 +71,7 @@ export default function TabsLayout() {
           }}
         />
         <Tabs.Screen
-          name="bills"
+          name="expenses"
           options={{
             title: t('bills.tabLabel'),
             tabBarIcon: ({ color, size }) => <BillsIcon color={color} size={size} />,

@@ -26,8 +26,9 @@ function seedBalance(w: World, amount: number): void {
     byMemberId: w.household.members[0]?.id ?? 'm1',
     accountId,
     siloId: null,
-    billId: null,
+    expenseId: null,
     categoryIds: [],
+    receivedAt: w.today,
     createdAt: w.today,
   };
   w.household = { ...w.household, transactions: [...w.household.transactions, tx] };

@@ -140,8 +140,9 @@ export function NewIncomeSheet({ open, onClose, defaultMemberId, editTransaction
         byMemberId: values.memberId,
         accountId: values.accountId,
         siloId: null,
-        billId: null,
+        expenseId: null,
         categoryIds: [],
+        receivedAt: null,
       });
     }
     reset();

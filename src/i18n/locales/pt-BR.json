@@ -173,12 +173,11 @@
     "paycheckIn": "{{days}} DIAS ATÉ O PRÓXIMO PAGAMENTO DE",
     "comingUp": "Próximas",
     "paidCount": "{{paid}} PAGAS · {{remaining}} A PAGAR",
-    "seeAll": "Ver todas as contas →",
-    "recentExpenses": "Despesas recentes"
+    "seeAll": "Ver todas as contas →"
   },
   "bills": {
-    "tabLabel": "Contas",
-    "title": "Contas",
+    "tabLabel": "Despesas",
+    "title": "Despesas",
     "viewingPast": "MÊS PASSADO · HISTÓRICO",
     "viewingFuture": "MÊS FUTURO · PROJEÇÃO",
     "filter": {
@@ -194,6 +193,7 @@
     },
     "newObligation": "Nova conta",
     "empty": "Nada por aqui.",
+    "spentThisMonth": "Gastos no mês",
     "estimate": "EST",
     "paidOn": "PAGA {{date}}",
     "due": {
@@ -229,7 +229,8 @@
       "biweekly": "A cada 2 semanas",
       "yearly": "Uma vez por ano",
       "one-time": "Uma vez"
-    }
+    },
+    "deleteExpense": "Excluir despesa"
   },
   "silos": {
     "tabLabel": "Silos",
@@ -273,7 +274,7 @@
     "kinds": {
       "expense": {
         "title": "Despesa",
-        "sub": "Dinheiro consumido. Mercado, jantar, uma conta avulsa."
+        "sub": "Dinheiro consumido. Uma compra avulsa ou uma despesa recorrente."
       },
       "income": {
         "title": "Renda",
@@ -286,10 +287,6 @@
       "asset": {
         "title": "Silo",
         "sub": "Poupança, imóvel, investimento. Armazene fora do gastável."
-      },
-      "bill": {
-        "title": "Conta",
-        "sub": "Conta recorrente que vai entrar todo mês."
       }
     },
     "expense": {
@@ -299,7 +296,25 @@
       "paidFrom": "Pago de",
       "whoPaid": "Quem pagou",
       "submit": "Registrar despesa",
-      "successFlash": "Despesa registrada"
+      "save": "Salvar",
+      "editTitle": "Editar despesa",
+      "successFlash": "Despesa registrada",
+      "isRecurring": "Recorrente",
+      "recurrenceKind": "Repete",
+      "recurrence": {
+        "monthly": "Todo mês",
+        "biweekly": "A cada 2 semanas",
+        "weekly": "Toda semana",
+        "bimonthly": "A cada 2 meses",
+        "yearly": "Uma vez por ano"
+      },
+      "date": "Data",
+      "dueDate": "Vencimento",
+      "variableLabel": "Valor variável",
+      "estimatePlaceholder": "Estimativa (opcional)",
+      "endsAtToggle": "Número fixo de parcelas",
+      "installments": "Quantas parcelas?",
+      "installmentsPlaceholder": "Ex: 12"
     },
     "transfer": {
       "amount": "Valor",
@@ -362,7 +377,6 @@
     "thisWeek": "Essa semana",
     "remaining": "Restante",
     "of": "de",
-    "logSpend": "Atualizar",
     "spent": "{{value}} GASTO",
     "youSet": "VOCÊ DEFINIU",
     "weekDots": [

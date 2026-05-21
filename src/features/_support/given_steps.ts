@@ -98,7 +98,7 @@ Given<World>('a bank account {string} with {string} balance', (w, name, balance)
   w.household.transactions.push({
     id: ulid(), kind: 'income', name: 'Initial balance', amount: parseMoney(balance),
     date: w.today, byMemberId: account.ownerId, accountId: account.id,
-    siloId: null, billId: null, categoryIds: [], createdAt: w.today,
+    siloId: null, expenseId: null, categoryIds: [], receivedAt: w.today, createdAt: w.today,
   });
 });
 

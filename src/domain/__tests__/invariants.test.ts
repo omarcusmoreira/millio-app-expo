@@ -1,18 +1,18 @@
 import * as fc from 'fast-check';
-import type { Bill, Household, Income, Member, Silo, Transaction } from '../entities';
+import type { Expense, Household, Income, Member, Silo, Transaction } from '../entities';
 import {
   applyTransfer,
   deduplicateIds,
   isValidColor,
-  markBillPaid,
+  markExpensePaid,
   removeMember,
   transferCashToSilo,
   transferSiloToCash,
   updateSiloValue,
-  validateBill,
+  validateExpense,
 } from '../commands';
 import {
-  billStatus,
+  expenseStatus,
   cashOnHand,
   effectiveAllowance,
   freeToSpend,
@@ -52,11 +52,10 @@ const emptyHousehold = (): Household => ({
   cashAccounts: [{ id: ID('acc1'), name: 'Checking', ownerId: ID('1') }],
   categories: [],
   labels: [],
-  bills: [],
+  expenses: [],
   silos: [],
   incomes: [income()],
   transactions: [],
-  allowance: { weekStart: '2026-05-11', override: null },
   locale: 'pt-BR',
   createdAt: '2026-01-01',
 });
@@ -72,38 +71,40 @@ const silo = (value = 1000): Silo => ({
   createdAt: '2026-01-01',
 });
 
-const fixedBill = (amount = 500): Bill => ({
-  id: ID('bill1'),
+const fixedExpense = (amount = 500): Expense => ({
+  id: ID('exp1'),
   name: 'Rent',
   amount,
   estimate: null,
   variable: false,
-  due: '2026-05-20',
+  date: '2026-05-20',
   recurring: 'monthly',
+  endsAt: null,
   assigneeId: ID('1'),
+  accountId: ID('acc1'),
   categoryIds: [],
   labelIds: [],
   paidAt: null,
   paidAmount: null,
-  paidFromAccountId: null,
   createdAt: '2026-01-01',
   updatedAt: '2026-01-01',
 });
 
-const variableBill = (estimate = 300): Bill => ({
-  id: ID('bill2'),
+const variableExpense = (estimate = 300): Expense => ({
+  id: ID('exp2'),
   name: 'Electricity',
   amount: null,
   estimate,
   variable: true,
-  due: '2026-05-25',
+  date: '2026-05-25',
   recurring: 'monthly',
+  endsAt: null,
   assigneeId: ID('1'),
+  accountId: ID('acc1'),
   categoryIds: [],
   labelIds: [],
   paidAt: null,
   paidAmount: null,
-  paidFromAccountId: null,
   createdAt: '2026-01-01',
   updatedAt: '2026-01-01',
 });
@@ -117,8 +118,9 @@ const incomeTx = (amount: number): Transaction => ({
   byMemberId: ID('1'),
   accountId: ID('acc1'),
   siloId: null,
-  billId: null,
+  expenseId: null,
   categoryIds: [],
+  receivedAt: '2026-05-05',
   createdAt: '2026-05-05',
 });
 
@@ -187,7 +189,7 @@ describe('Inv-2 · freeToSpend never negative', () => {
         (cash, pending) => {
           const h = {
             ...emptyHousehold(),
-            bills: [fixedBill(pending)],
+            expenses: [fixedExpense(pending)],
             transactions: [incomeTx(cash)],
           };
           return freeToSpend(h, TODAY) >= 0;
@@ -196,10 +198,10 @@ describe('Inv-2 · freeToSpend never negative', () => {
     );
   });
 
-  it('explicit: bills > cash still returns 0', () => {
+  it('explicit: expenses > cash still returns 0', () => {
     const h = {
       ...emptyHousehold(),
-      bills: [fixedBill(2000)],
+      expenses: [fixedExpense(2000)],
       transactions: [incomeTx(500)],
     };
     expect(freeToSpend(h, TODAY)).toBe(0);
@@ -236,94 +238,87 @@ describe('Inv-3 · updateSiloValue never moves cash', () => {
   });
 });
 
-// ─── Inv-4: markBillPaid reduces cash ────────────────────────────────────────
+// ─── Inv-4: markExpensePaid reduces cash ─────────────────────────────────────
 
-describe('Inv-4 · markBillPaid reduces cashOnHand', () => {
+describe('Inv-4 · markExpensePaid reduces cashOnHand', () => {
   it('reduces cash by exactly paidAmount', () => {
     const initialCash = 2000;
-    const paidAmount = 750;
     const h = {
       ...emptyHousehold(),
-      bills: [fixedBill(500)],
+      expenses: [fixedExpense(500)],
       transactions: [incomeTx(initialCash)],
     };
-    const { household: after } = markBillPaid(
+    const { household: after } = markExpensePaid(
       h,
-      ID('bill1'),
-      paidAmount,
-      ID('acc1'),
+      ID('exp1'),
       TODAY,
       ID('tx-pay1'),
     );
-    expect(cashOnHand(after)).toBeCloseTo(initialCash - paidAmount, 2);
+    expect(cashOnHand(after)).toBeCloseTo(initialCash - 500, 2);
   });
 
-  it('variable bill: paidAmount is actual value, not estimate', () => {
+  it('variable expense: paidAmount is the estimate value', () => {
     const h = {
       ...emptyHousehold(),
-      bills: [variableBill(300)],
+      expenses: [variableExpense(300)],
       transactions: [incomeTx(2000)],
     };
-    const { household: after } = markBillPaid(
+    const { household: after } = markExpensePaid(
       h,
-      ID('bill2'),
-      425, // different from estimate (300)
-      ID('acc1'),
+      ID('exp2'),
       TODAY,
       ID('tx-pay2'),
     );
-    const paid = after.bills.find((b) => b.id === ID('bill2'));
-    expect(paid?.paidAmount).toBe(425);
-    expect(cashOnHand(after)).toBeCloseTo(2000 - 425, 2);
+    const paid = after.expenses.find((e) => e.id === ID('exp2'));
+    expect(paid?.paidAmount).toBe(300);
+    expect(cashOnHand(after)).toBeCloseTo(2000 - 300, 2);
   });
 
-  it('property: cash decreases by paidAmount', () => {
+  it('property: cash decreases by expense amount', () => {
     fc.assert(
       fc.property(
         fc.double({ min: 100, max: 10_000, noNaN: true }),
         fc.double({ min: 1, max: 100, noNaN: true }),
-        (initialCash, paidAmount) => {
+        (initialCash, expenseAmount) => {
           const h = {
             ...emptyHousehold(),
-            bills: [fixedBill(500)],
+            expenses: [fixedExpense(expenseAmount)],
             transactions: [incomeTx(initialCash)],
           };
-          const { household: after } = markBillPaid(
+          const { household: after } = markExpensePaid(
             h,
-            ID('bill1'),
-            paidAmount,
-            ID('acc1'),
+            ID('exp1'),
             TODAY,
             ID('tx-p'),
           );
-          return Math.abs(cashOnHand(after) - (initialCash - paidAmount)) < 0.01;
+          return Math.abs(cashOnHand(after) - (initialCash - expenseAmount)) < 0.01;
         },
       ),
     );
   });
 });
 
-// ─── Inv-5: Variable bill has estimate; fixed bill has amount ─────────────────
+// ─── Inv-5: Variable expense has estimate; fixed has amount ──────────────────
 
-describe('Inv-5 · Variable ↔ fixed bill constraint', () => {
-  it('valid fixed bill', () => {
-    expect(validateBill({ variable: false, amount: 500, estimate: null })).toBe(true);
+describe('Inv-5 · Variable ↔ fixed expense constraint', () => {
+  it('valid fixed expense', () => {
+    expect(validateExpense({ variable: false, amount: 500, estimate: null })).toBe(true);
   });
 
-  it('valid variable bill', () => {
-    expect(validateBill({ variable: true, amount: null, estimate: 300 })).toBe(true);
+  it('valid variable expense', () => {
+    expect(validateExpense({ variable: true, amount: null, estimate: 300 })).toBe(true);
   });
 
   it('invalid: fixed with estimate', () => {
-    expect(validateBill({ variable: false, amount: 500, estimate: 300 })).toBe(false);
+    expect(validateExpense({ variable: false, amount: 500, estimate: 300 })).toBe(false);
   });
 
   it('invalid: variable with amount', () => {
-    expect(validateBill({ variable: true, amount: 500, estimate: 300 })).toBe(false);
+    expect(validateExpense({ variable: true, amount: 500, estimate: 300 })).toBe(false);
   });
 
   it('invalid: fixed with no amount', () => {
-    expect(validateBill({ variable: false, amount: null, estimate: null })).toBe(false);
+    expect(validateExpense({ variable: false, amount: null, estimate: null })).toBe(false);
   });
 });
 
@@ -338,7 +333,7 @@ describe('Inv-6 · suggestedWeeklyAllowance <= freeToSpend + rounding tolerance'
         (cash, pendingAmount) => {
           const h = {
             ...emptyHousehold(),
-            bills: pendingAmount > 0 ? [fixedBill(pendingAmount)] : [],
+            expenses: pendingAmount > 0 ? [fixedExpense(pendingAmount)] : [],
             transactions: [incomeTx(cash)],
           };
           const suggested = suggestedWeeklyAllowance(h, TODAY);
@@ -350,36 +345,36 @@ describe('Inv-6 · suggestedWeeklyAllowance <= freeToSpend + rounding tolerance'
   });
 });
 
-// ─── Inv-8: Bill status is deterministic ─────────────────────────────────────
+// ─── Inv-8: Expense status is deterministic ───────────────────────────────────
 
-describe('Inv-8 · billStatus is deterministic', () => {
-  it('paid bill returns "paid"', () => {
-    const b: Bill = { ...fixedBill(), paidAt: TODAY };
-    expect(billStatus(b, TODAY)).toBe('paid');
+describe('Inv-8 · expenseStatus is deterministic', () => {
+  it('paid expense returns "paid"', () => {
+    const e: Expense = { ...fixedExpense(), paidAt: TODAY };
+    expect(expenseStatus(e, TODAY)).toBe('paid');
   });
 
-  it('future due bill returns "upcoming"', () => {
-    const b: Bill = { ...fixedBill(), due: '2026-12-31' };
-    expect(billStatus(b, TODAY)).toBe('upcoming');
+  it('future date expense returns "upcoming"', () => {
+    const e: Expense = { ...fixedExpense(), date: '2026-12-31' };
+    expect(expenseStatus(e, TODAY)).toBe('upcoming');
   });
 
-  it('past due bill returns "overdue"', () => {
-    const b: Bill = { ...fixedBill(), due: '2026-01-01' };
-    expect(billStatus(b, TODAY)).toBe('overdue');
+  it('past date expense returns "overdue"', () => {
+    const e: Expense = { ...fixedExpense(), date: '2026-01-01' };
+    expect(expenseStatus(e, TODAY)).toBe('overdue');
   });
 
-  it('property: paid always wins regardless of due date', () => {
+  it('property: paid always wins regardless of date', () => {
     fc.assert(
       fc.property(
         fc.date({ min: new Date('2020-01-01'), max: new Date('2030-12-31') }),
-        (dueDate) => {
-          if (isNaN(dueDate.getTime())) return true; // skip invalid dates
-          const b: Bill = {
-            ...fixedBill(),
-            due: dueDate.toISOString().slice(0, 10),
+        (date) => {
+          if (isNaN(date.getTime())) return true;
+          const e: Expense = {
+            ...fixedExpense(),
+            date: date.toISOString().slice(0, 10),
             paidAt: TODAY,
           };
-          return billStatus(b, TODAY) === 'paid';
+          return expenseStatus(e, TODAY) === 'paid';
         },
       ),
     );
@@ -414,24 +409,24 @@ describe('Inv-9 · netWorth = cashOnHand + sum(silos)', () => {
 
 // ─── Inv-10: Members never vanish ────────────────────────────────────────────
 
-describe('Inv-10 · removeMember reassigns bills', () => {
-  it('all bills have a valid assignee after removal', () => {
+describe('Inv-10 · removeMember reassigns expenses', () => {
+  it('all expenses have a valid assignee after removal', () => {
     const m1 = member('1');
     const m2: Member = { ...member('2'), id: ID('2'), name: 'Patricia', initial: 'P' };
-    const bill1 = fixedBill();
+    const exp1 = fixedExpense();
     const h: Household = {
       ...emptyHousehold(),
       members: [m1, m2],
-      bills: [bill1],
+      expenses: [exp1],
     };
     const after = removeMember(h, ID('1'));
     const remainingIds = new Set(after.members.map((m) => m.id));
-    for (const b of after.bills) {
-      expect(remainingIds.has(b.assigneeId)).toBe(true);
+    for (const e of after.expenses) {
+      expect(remainingIds.has(e.assigneeId)).toBe(true);
     }
   });
 
-  it('property: no orphaned bills after random removal', () => {
+  it('property: no orphaned expenses after random removal', () => {
     fc.assert(
       fc.property(
         fc.integer({ min: 1, max: 5 }),
@@ -441,17 +436,16 @@ describe('Inv-10 · removeMember reassigns bills', () => {
             id: ID(`extra-${i}`),
           }));
           const allMembers = [member('1'), ...extraMembers];
-          const bills = allMembers.map((m, i) => ({
-            ...fixedBill(),
-            id: ID(`b${i}`),
+          const expenses = allMembers.map((m, i) => ({
+            ...fixedExpense(),
+            id: ID(`e${i}`),
             assigneeId: m.id,
           }));
-          const h: Household = { ...emptyHousehold(), members: allMembers, bills };
-          // Remove the first member
+          const h: Household = { ...emptyHousehold(), members: allMembers, expenses };
           const after = removeMember(h, ID('1'));
           const remainingIds = new Set(after.members.map((m) => m.id));
           return after.members.length === extraMemberCount
-            && after.bills.every((b) => remainingIds.has(b.assigneeId));
+            && after.expenses.every((e) => remainingIds.has(e.assigneeId));
         },
       ),
     );
@@ -461,7 +455,6 @@ describe('Inv-10 · removeMember reassigns bills', () => {
 // ─── Inv-12: i18n keyset parity ───────────────────────────────────────────────
 
 describe('Inv-12 · i18n does not fail silently', () => {
-  // Lazy-require to avoid transform issues
   const loadMessages = () => {
     const ptBR = require('../../i18n/locales/pt-BR.json') as Record<string, unknown>;
     const enUS = require('../../i18n/locales/en-US.json') as Record<string, unknown>;
@@ -494,57 +487,60 @@ describe('Inv-12 · i18n does not fail silently', () => {
   });
 });
 
-// ─── Inv-13: Weekly allowance sums correct transactions ───────────────────────
+// ─── Inv-13: Weekly spent sums all expense transactions in current week ───────
 
-describe('Inv-13 · weeklySpent sums only allowance-spend in current week', () => {
-  it('excludes bill-payments from weekly spent', () => {
+describe('Inv-13 · weeklySpent sums all expense transactions in current week', () => {
+  it('counts expense transactions in week, excludes those outside', () => {
     const h: Household = {
       ...emptyHousehold(),
-      allowance: { weekStart: '2026-05-11', override: null },
       transactions: [
         {
           id: ID('t1'),
-          kind: 'allowance-spend',
+          kind: 'expense',
           name: 'Coffee',
           amount: 30,
-          date: '2026-05-12',
+          date: '2026-05-12', // Mon 2026-05-11 week → in range
           byMemberId: ID('1'),
           accountId: ID('acc1'),
           siloId: null,
-          billId: null,
+          expenseId: null,
           categoryIds: [],
+          receivedAt: null,
           createdAt: '2026-05-12',
         },
         {
           id: ID('t2'),
-          kind: 'bill-payment',
+          kind: 'expense',
           name: 'Rent',
           amount: 1000,
-          date: '2026-05-12',
+          date: '2026-05-14', // also in week
           byMemberId: ID('1'),
           accountId: ID('acc1'),
           siloId: null,
-          billId: null,
+          expenseId: null,
           categoryIds: [],
-          createdAt: '2026-05-12',
+          receivedAt: null,
+          createdAt: '2026-05-14',
         },
         // Out of week
         {
           id: ID('t3'),
-          kind: 'allowance-spend',
+          kind: 'expense',
           name: 'Lunch',
           amount: 50,
-          date: '2026-05-05',
+          date: '2026-05-05', // previous week
           byMemberId: ID('1'),
           accountId: ID('acc1'),
           siloId: null,
-          billId: null,
+          expenseId: null,
           categoryIds: [],
+          receivedAt: null,
           createdAt: '2026-05-05',
         },
       ],
     };
-    expect(weeklySpent(h)).toBe(30);
+    // TODAY = '2026-05-17', weekStart = '2026-05-11'
+    expect(weeklySpent(h, TODAY)).toBe(1030);
   });
 });
 
@@ -581,36 +577,43 @@ describe('Color validation', () => {
 
   it('malformed hex is rejected', () => {
     expect(isValidColor('#GG0000')).toBe(false);
-    expect(isValidColor('#12345')).toBe(false);   // 5 chars
+    expect(isValidColor('#12345')).toBe(false);
     expect(isValidColor('red')).toBe(false);
     expect(isValidColor('')).toBe(false);
-    expect(isValidColor('#FF000')).toBe(false);   // only 5 hex digits
+    expect(isValidColor('#FF000')).toBe(false);
   });
 });
 
 // ─── Test case 7: Next paycheck skips year boundary ──────────────────────────
 
-describe('nextPaycheck skips to 2027 from 2026-12-31', () => {
-  it('monthly day 5 from Dec 31 → Jan 5 2027', () => {
+describe('nextPaycheck returns soonest pending income transaction', () => {
+  it('returns soonest unreceivedIncome transaction on or after today', () => {
     const h: Household = {
       ...emptyHousehold(),
-      incomes: [
-        {
-          ...income(),
-          schedule: { kind: 'monthly', days: [5] },
-        },
+      transactions: [
+        { ...incomeTx(10000), id: ID('tx2'), date: '2027-01-05', receivedAt: null },
+        { ...incomeTx(5000),  id: ID('tx3'), date: '2027-02-05', receivedAt: null },
+        { ...incomeTx(2000),  id: ID('tx4'), date: '2026-12-30', receivedAt: '2026-12-30' },
       ],
     };
     const result = nextPaycheck(h, '2026-12-31');
     expect(result?.date).toBe('2027-01-05');
+    expect(result?.memberId).toBe(ID('1'));
+  });
+
+  it('returns null when all income transactions are received', () => {
+    const h: Household = {
+      ...emptyHousehold(),
+      transactions: [{ ...incomeTx(10000), receivedAt: '2026-05-05' }],
+    };
+    expect(nextPaycheck(h, TODAY)).toBeNull();
   });
 });
 
 // ─── Test case 8: Invalid date is rejected ───────────────────────────────────
 
-describe('Bill date validation', () => {
+describe('Expense date validation', () => {
   it('rejects 2026-02-31 (does not exist)', () => {
-    // JS Date normalizes overflow: Feb 31 → Mar 3. We detect by re-parsing.
     const isValidISODate = (s: string): boolean => {
       const [y, m, d] = s.split('-').map(Number) as [number, number, number];
       const date = new Date(Date.UTC(y, m - 1, d));
@@ -622,7 +625,7 @@ describe('Bill date validation', () => {
     };
     expect(isValidISODate('2026-02-28')).toBe(true);
     expect(isValidISODate('2026-02-31')).toBe(false);
-    expect(isValidISODate('2026-04-31')).toBe(false); // April has 30 days
+    expect(isValidISODate('2026-04-31')).toBe(false);
     expect(isValidISODate('2026-12-31')).toBe(true);
   });
 });

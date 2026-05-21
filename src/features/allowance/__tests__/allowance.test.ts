@@ -1,19 +1,14 @@
-// Gherkin: allowance/calculation.feature, allowance/adjust.feature, allowance/log-spend.feature
-// @unit scenarios (pure domain — no UI)
+// Gherkin: allowance/calculation.feature  (@unit scenarios)
+// Tests that remain after removing override/log-spend features.
 
-import { describe, it, expect, beforeEach } from 'vitest';
-import type { Income, Transaction } from '../../../domain/entities';
+import { describe, it, expect } from 'vitest';
+import type { Expense, Income, Transaction } from '../../../domain/entities';
 import {
   suggestedWeeklyAllowance,
   effectiveAllowance,
   weeklySpent,
   freeToSpend,
 } from '../../../domain/selectors';
-import {
-  setAllowanceOverride,
-  clearAllowanceOverride,
-  logAllowanceSpend,
-} from '../../../domain/commands';
 import { parseMoney, createWorld, parseRelDate } from '../../_support/world';
 
 type World = ReturnType<typeof createWorld>;
@@ -29,8 +24,9 @@ function seedBalance(w: World, amount: number): void {
     byMemberId: w.household.members[0]?.id ?? 'm1',
     accountId,
     siloId: null,
-    billId: null,
+    expenseId: null,
     categoryIds: [],
+    receivedAt: w.today,
     createdAt: w.today,
   };
   w.household = { ...w.household, transactions: [...w.household.transactions, tx] };
@@ -57,30 +53,26 @@ function addIncome(w: World, amount: number, payDay: number): void {
   w.household = { ...w.household, incomes: [...w.household.incomes, income] };
 }
 
-function addBill(w: World, name: string, amount: number, dueStr: string): void {
-  w.household = {
-    ...w.household,
-    bills: [
-      ...w.household.bills,
-      {
-        id: `bill-${name}`,
-        name,
-        amount,
-        estimate: null,
-        variable: false,
-        due: parseRelDate(dueStr, w.today),
-        recurring: 'monthly' as const,
-        assigneeId: w.household.members[0]?.id ?? 'm1',
-        categoryIds: [],
-        labelIds: [],
-        paidAt: null,
-        paidAmount: null,
-        paidFromAccountId: null,
-        createdAt: w.today,
-        updatedAt: w.today,
-      },
-    ],
+function addExpense(w: World, name: string, amount: number, dateStr: string): void {
+  const expense: Expense = {
+    id: `expense-${name}`,
+    name,
+    amount,
+    estimate: null,
+    variable: false,
+    date: parseRelDate(dateStr, w.today),
+    recurring: 'monthly',
+    endsAt: null,
+    assigneeId: w.household.members[0]?.id ?? 'm1',
+    accountId: null,
+    categoryIds: [],
+    labelIds: [],
+    paidAt: null,
+    paidAmount: null,
+    createdAt: w.today,
+    updatedAt: w.today,
   };
+  w.household = { ...w.household, expenses: [...w.household.expenses, expense] };
 }
 
 function background(): World {
@@ -96,7 +88,7 @@ function background(): World {
 describe('Feature: Automatic weekly allowance calculation', () => {
   it('@unit Default suggestion — free_to_spend / days_to_paycheck × 7', () => {
     const w = background();
-    addBill(w, 'Rent', parseMoney('R$ 2.850,00'), 'in 5 days');
+    addExpense(w, 'Rent', parseMoney('R$ 2.850,00'), 'in 5 days');
     // free_to_spend = 10000 - 2850 = 7150; today=May16, next=Jun1 → 16 days
     // 7150 / 16 * 7 = 3128.125 → rounds to 3128
     const suggestion = suggestedWeeklyAllowance(w.household, w.today);
@@ -105,16 +97,17 @@ describe('Feature: Automatic weekly allowance calculation', () => {
 
   it('@unit @invariant Inv-6 — suggestion never exceeds free-to-spend', () => {
     const w = background();
-    addBill(w, 'Rent', parseMoney('R$ 8.000,00'), 'in 5 days');
+    addExpense(w, 'Rent', parseMoney('R$ 8.000,00'), 'in 5 days');
     const fts = freeToSpend(w.household, w.today);
     const suggestion = suggestedWeeklyAllowance(w.household, w.today);
     expect(suggestion).toBeLessThanOrEqual(fts + 1); // +1 for rounding tolerance
   });
 
-  it('@unit Override beats suggestion', () => {
+  it('@unit effectiveAllowance equals suggestion (no override)', () => {
     const w = background();
-    w.household = setAllowanceOverride(w.household, parseMoney('R$ 2.050,00'));
-    expect(effectiveAllowance(w.household, w.today)).toBeCloseTo(parseMoney('R$ 2.050,00'), 2);
+    addExpense(w, 'Rent', parseMoney('R$ 2.850,00'), 'in 5 days');
+    const suggestion = suggestedWeeklyAllowance(w.household, w.today);
+    expect(effectiveAllowance(w.household, w.today)).toBeCloseTo(suggestion, 2);
   });
 
   it('@unit No income configured falls back to 30-day default', () => {
@@ -141,80 +134,49 @@ describe('Feature: Automatic weekly allowance calculation', () => {
   });
 });
 
-// ─── Feature: Manually adjust the weekly allowance ────────────────────────────
+// ─── Feature: Weekly spent ────────────────────────────────────────────────────
 
-describe('Feature: Manually adjust the weekly allowance', () => {
-  it('@unit Setting an override stores the value', () => {
-    const w = background();
-    w.household = setAllowanceOverride(w.household, parseMoney('R$ 1.500,00'));
-    expect(w.household.allowance.override).toBeCloseTo(parseMoney('R$ 1.500,00'), 2);
-    expect(effectiveAllowance(w.household, w.today)).toBeCloseTo(parseMoney('R$ 1.500,00'), 2);
-  });
-
-  it('@unit Reverting to suggestion clears override', () => {
-    const w = background();
-    w.household = setAllowanceOverride(w.household, parseMoney('R$ 2.050,00'));
-    w.household = clearAllowanceOverride(w.household);
-    expect(w.household.allowance.override).toBeNull();
-    const suggestion = suggestedWeeklyAllowance(w.household, w.today);
-    expect(effectiveAllowance(w.household, w.today)).toBeCloseTo(suggestion, 2);
-  });
-});
-
-// ─── Feature: Log a weekly spend ──────────────────────────────────────────────
-
-describe('Feature: Log a weekly spend', () => {
-  let w: World;
-
-  beforeEach(() => {
-    w = createWorld();
+describe('Feature: Weekly spent', () => {
+  it('@unit weeklySpent sums expense transactions in current week', () => {
+    const w = createWorld();
     addAccount(w);
-    seedBalance(w, parseMoney('R$ 10.000,00'));
-    w.household = setAllowanceOverride(w.household, parseMoney('R$ 2.000,00'));
-    // Set weekStart to Monday of the current week so dates fall within
-    w.household = { ...w.household, allowance: { ...w.household.allowance, weekStart: '2026-05-11' } };
-  });
-
-  it('@unit @invariant Spend adds to weeklySpent and drops remaining', () => {
-    const result = logAllowanceSpend(
-      w.household,
-      'Mercado',
-      parseMoney('R$ 142,40'),
-      w.household.members[0]?.id ?? 'm1',
-      w.today,
-      'tx-spend-1',
-    );
-    w.household = result.household;
-
-    const spent = weeklySpent(w.household);
-    const effective = effectiveAllowance(w.household, w.today);
-    const remaining = Math.max(0, effective - spent);
-
-    expect(spent).toBeCloseTo(parseMoney('R$ 142,40'), 2);
-    expect(remaining).toBeCloseTo(parseMoney('R$ 1.857,60'), 2);
-    expect(result.household.transactions.some((t) => t.kind === 'allowance-spend')).toBe(true);
-  });
-
-  it('@unit Multiple spends sum', () => {
-    let r = logAllowanceSpend(w.household, 'Mercado', parseMoney('R$ 142,40'), 'm1', w.today, 'tx-1');
-    r = logAllowanceSpend(r.household, 'Jantar', parseMoney('R$ 68,50'), 'm1', w.today, 'tx-2');
-    r = logAllowanceSpend(r.household, 'Café', parseMoney('R$ 23,00'), 'm1', w.today, 'tx-3');
-    w.household = r.household;
-
-    expect(weeklySpent(w.household)).toBeCloseTo(parseMoney('R$ 233,90'), 2);
-    const remaining = Math.max(0, effectiveAllowance(w.household, w.today) - weeklySpent(w.household));
-    expect(remaining).toBeCloseTo(parseMoney('R$ 1.766,10'), 2);
-  });
-
-  it('@unit Exceeding allowance clamps remaining to 0', () => {
-    const r = logAllowanceSpend(w.household, 'Big purchase', parseMoney('R$ 2.500,00'), 'm1', w.today, 'tx-big');
-    w.household = r.household;
-
-    const spent = weeklySpent(w.household);
-    const effective = effectiveAllowance(w.household, w.today);
-    const remaining = Math.max(0, effective - spent);
-
-    expect(spent).toBeCloseTo(parseMoney('R$ 2.500,00'), 2);
-    expect(remaining).toBe(0);
+    const accountId = w.household.cashAccounts[0]?.id ?? 'acc';
+    const memberId = w.household.members[0]?.id ?? 'm1';
+    w.household = {
+      ...w.household,
+      transactions: [
+        {
+          id: 'tx1',
+          kind: 'expense',
+          name: 'Mercado',
+          amount: 142.40,
+          date: '2026-05-13',
+          byMemberId: memberId,
+          accountId,
+          siloId: null,
+          expenseId: null,
+          categoryIds: [],
+          receivedAt: null,
+          createdAt: '2026-05-13',
+        },
+        {
+          id: 'tx2',
+          kind: 'expense',
+          name: 'Jantar',
+          amount: 68.50,
+          date: '2026-05-16',
+          byMemberId: memberId,
+          accountId,
+          siloId: null,
+          expenseId: null,
+          categoryIds: [],
+          receivedAt: null,
+          createdAt: '2026-05-16',
+        },
+      ],
+    };
+    // Week of May 16 = Mon May 11 – Sun May 17. Both dates fall in this week.
+    const spent = weeklySpent(w.household, '2026-05-16');
+    expect(spent).toBeCloseTo(142.40 + 68.50, 2);
   });
 });

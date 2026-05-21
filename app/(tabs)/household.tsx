@@ -14,15 +14,15 @@ import { useTranslation } from 'react-i18next';
 import { ChevronDown, Pencil, Plus, Trash2 } from 'lucide-react-native';
 import { useHouseholdStore } from '../../src/store/household';
 import { MemberAvatar, Money } from '../../src/ui/primitives';
-import { SwipeableBillItem } from '../../src/ui/components/SwipeableBillItem';
+import { SwipeableExpenseItem } from '../../src/ui/components/SwipeableExpenseItem';
 import { SwipeableIncomeItem } from '../../src/ui/components/SwipeableIncomeItem';
-import { NewBillSheet } from '../../src/ui/components/NewBillSheet';
+import { NewExpenseSheet } from '../../src/ui/components/NewExpenseSheet';
 import { NewIncomeSheet } from '../../src/ui/components/NewIncomeSheet';
 import { ConfirmModal } from '../../src/ui/components/ConfirmModal';
 import { useColors } from '../../src/ui/theme';
 import { font, radius, spacing } from '../../src/ui/tokens';
 import type { Colors } from '../../src/ui/tokens';
-import type { Bill, Member, Transaction } from '../../src/domain/entities';
+import type { Expense, Member, Transaction } from '../../src/domain/entities';
 
 function formatDate(iso: string): string {
   const [y, m, d] = iso.split('-').map(Number) as [number, number, number];
@@ -45,9 +45,11 @@ function MemberPanel({ member }: MemberPanelProps) {
   const addCashAccount  = useHouseholdStore((s) => s.addCashAccount);
   const removeCashAccount = useHouseholdStore((s) => s.removeCashAccount);
   const updateCashAccount = useHouseholdStore((s) => s.updateCashAccount);
-  const updateBill      = useHouseholdStore((s) => s.updateBill);
-  const deleteBill      = useHouseholdStore((s) => s.deleteBill);
+  const updateExpense   = useHouseholdStore((s) => s.updateExpense);
+  const deleteExpense   = useHouseholdStore((s) => s.deleteExpense);
+  const markExpensePaid = useHouseholdStore((s) => s.markExpensePaid);
   const deleteTransaction = useHouseholdStore((s) => s.deleteTransaction);
+  const markIncomeReceived = useHouseholdStore((s) => s.markIncomeReceived);
 
   const categories = household?.categories ?? [];
   const accounts   = (household?.cashAccounts ?? []).filter((a) => a.ownerId === member.id);
@@ -57,10 +59,13 @@ function MemberPanel({ member }: MemberPanelProps) {
     .sort((a, b) => b.date.localeCompare(a.date));
 
   const [todayYear, todayMonth] = today.split('-').map(Number) as [number, number];
-  const assignedBills = (household?.bills ?? []).filter((b) => {
-    if (b.assigneeId !== member.id) return false;
-    const [y, m] = b.due.split('-').map(Number) as [number, number];
-    return y === todayYear && m === todayMonth;
+  const assignedExpenses = (household?.expenses ?? []).filter((e) => {
+    if (e.assigneeId !== member.id) return false;
+    if (e.recurring === 'one-time') {
+      const [y, m] = e.date.split('-').map(Number) as [number, number];
+      return y === todayYear && m === todayMonth;
+    }
+    return !e.paidAt;
   });
 
   const monthlyTotal = incomeTransactions
@@ -73,8 +78,8 @@ function MemberPanel({ member }: MemberPanelProps) {
   const [incomeSheetOpen,   setIncomeSheetOpen]   = useState(false);
   const [editingIncomeTx,   setEditingIncomeTx]   = useState<Transaction | null>(null);
   const [deletingIncomeTx,  setDeletingIncomeTx]  = useState<Transaction | null>(null);
-  const [editBill,          setEditBill]          = useState<Bill | null>(null);
-  const [deletingBill,      setDeletingBill]      = useState<Bill | null>(null);
+  const [editExpense,       setEditExpense]       = useState<Expense | null>(null);
+  const [deletingExpense,   setDeletingExpense]   = useState<Expense | null>(null);
   const [addingAccount,     setAddingAccount]     = useState(false);
   const [accountName,       setAccountName]       = useState('');
   const [editingAccount,    setEditingAccount]    = useState<{ id: string; name: string } | null>(null);
@@ -103,19 +108,19 @@ function MemberPanel({ member }: MemberPanelProps) {
         editTransaction={editingIncomeTx ?? undefined}
         onClose={() => { setIncomeSheetOpen(false); setEditingIncomeTx(null); }}
       />
-      <NewBillSheet
-        open={editBill !== null}
-        bill={editBill ?? undefined}
-        onClose={() => setEditBill(null)}
+      <NewExpenseSheet
+        open={editExpense !== null}
+        expense={editExpense ?? undefined}
+        onClose={() => setEditExpense(null)}
       />
       <ConfirmModal
-        visible={deletingBill !== null}
-        title={t('addSheet.newBill.deleteBill')}
+        visible={deletingExpense !== null}
+        title={t('bills.deleteExpense')}
         message={t('common.deleteConfirm')}
-        confirmLabel={t('addSheet.newBill.deleteBill')}
+        confirmLabel={t('bills.deleteExpense')}
         cancelLabel={t('common.cancel')}
-        onConfirm={() => { if (deletingBill) deleteBill(deletingBill.id); setDeletingBill(null); }}
-        onCancel={() => setDeletingBill(null)}
+        onConfirm={() => { if (deletingExpense) deleteExpense(deletingExpense.id); setDeletingExpense(null); }}
+        onCancel={() => setDeletingExpense(null)}
       />
       <ConfirmModal
         visible={deletingIncomeTx !== null}
@@ -171,6 +176,7 @@ function MemberPanel({ member }: MemberPanelProps) {
                       categories={categories}
                       onEdit={() => { setEditingIncomeTx(tx); setIncomeSheetOpen(true); }}
                       onDelete={() => setDeletingIncomeTx(tx)}
+                      onMarkReceived={() => markIncomeReceived(tx.id)}
                     />
                   </View>
                 ))
@@ -178,29 +184,29 @@ function MemberPanel({ member }: MemberPanelProps) {
             </View>
           </View>
 
-          {/* Bills */}
+          {/* Expenses */}
           <View style={styles.section}>
             <Text style={styles.sectionEyebrowPad}>{t('member.billsAssigned').toUpperCase()}</Text>
             <View style={styles.card}>
-              {assignedBills.length === 0 ? (
+              {assignedExpenses.length === 0 ? (
                 <View style={styles.emptyRow}>
                   <Text style={styles.emptyText}>{t('member.emptyBills', { name: member.name })}</Text>
                 </View>
               ) : (
-                assignedBills.map((bill, idx) => (
-                  <View key={bill.id}>
+                assignedExpenses.map((expense, idx) => (
+                  <View key={expense.id}>
                     {idx > 0 && <View style={styles.billSep} />}
-                    <SwipeableBillItem
-                      bill={bill}
+                    <SwipeableExpenseItem
+                      expense={expense}
                       categories={categories}
                       today={today}
                       assignee={member}
-                      onEdit={() => setEditBill(bill)}
-                      onPay={() => bill.paidAt
-                        ? updateBill(bill.id, { paidAt: null, paidAmount: null, paidFromAccountId: null })
-                        : updateBill(bill.id, { paidAt: today, paidAmount: bill.amount ?? bill.estimate ?? 0, paidFromAccountId: null })
-                      }
-                      onDelete={() => setDeletingBill(bill)}
+                      onEdit={() => setEditExpense(expense)}
+                      {...(expense.recurring !== 'one-time' ? { onPay: () => expense.paidAt
+                        ? updateExpense(expense.id, { paidAt: null, paidAmount: null })
+                        : markExpensePaid(expense.id)
+                      } : {})}
+                      onDelete={() => setDeletingExpense(expense)}
                     />
                   </View>
                 ))

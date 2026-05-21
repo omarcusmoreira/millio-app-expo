@@ -7,40 +7,41 @@ import {
   View,
 } from 'react-native';
 import { Check, RotateCcw, Trash2 } from 'lucide-react-native';
-import type { Bill, Category, Member } from '../../domain/entities';
-import { BillItem } from './BillItem';
+import type { Category, Expense, Member } from '../../domain/entities';
+import { ExpenseItem } from './ExpenseItem';
 import type { Colors } from '../tokens';
 import { useColors } from '../theme';
 
-// Snap-to-reveal threshold — button becomes visible at this point
 const REVEAL = 80;
-// Past this distance (or with high velocity) → action fires immediately
 const TRIGGER = 200;
 
-interface SwipeableBillItemProps {
-  bill: Bill;
+interface SwipeableExpenseItemProps {
+  expense: Expense;
   categories: Category[];
   today: string;
   assignee?: Member | undefined;
   onEdit?: () => void;
-  onPay?: () => void;
+  onPay?: (() => void) | undefined;
   onDelete?: () => void;
 }
 
-export function SwipeableBillItem({
-  bill,
+export function SwipeableExpenseItem({
+  expense,
   categories,
   today,
   assignee,
   onEdit,
   onPay,
   onDelete,
-}: SwipeableBillItemProps) {
+}: SwipeableExpenseItemProps) {
   const colors = useColors();
   const styles = makeStyles(colors);
   const translateX = useRef(new Animated.Value(0)).current;
   const openSide = useRef<'pay' | 'delete' | null>(null);
   const baseX = useRef(0);
+
+  // One-time expenses are always paid — no pay action
+  const canPay = onPay && expense.recurring !== 'one-time';
 
   const snap = (toValue: number, side: 'pay' | 'delete' | null) => {
     Animated.spring(translateX, {
@@ -56,17 +57,9 @@ export function SwipeableBillItem({
   const openPay = () => snap(REVEAL, 'pay');
   const openDelete = () => snap(-REVEAL, 'delete');
 
-  const firePay = () => {
-    close();
-    onPay?.();
-  };
+  const firePay = () => { close(); onPay?.(); };
+  const fireDelete = () => { close(); onDelete?.(); };
 
-  const fireDelete = () => {
-    close();
-    onDelete?.();
-  };
-
-  // Background color interpolation: action slot intensifies past REVEAL
   const payBg = translateX.interpolate({
     inputRange: [0, REVEAL, TRIGGER],
     outputRange: [colors.semantic.olive, colors.semantic.olive, colors.semantic.olive],
@@ -89,21 +82,17 @@ export function SwipeableBillItem({
           openSide.current === 'delete' ? -REVEAL : 0;
       },
       onPanResponderMove: (_, { dx }) => {
-        // Allow dragging past REVEAL all the way to TRIGGER
         translateX.setValue(Math.max(-TRIGGER, Math.min(TRIGGER, baseX.current + dx)));
       },
       onPanResponderRelease: (_, { dx, vx }) => {
         const val = baseX.current + dx;
-
         if (val <= -TRIGGER || vx < -1.2) {
-          // Full left swipe or fast flick → fire delete immediately
           fireDelete();
-        } else if (val >= TRIGGER || vx > 1.2) {
-          // Full right swipe or fast flick → fire pay immediately
+        } else if (canPay && (val >= TRIGGER || vx > 1.2)) {
           firePay();
         } else if (val < -REVEAL / 2) {
           openDelete();
-        } else if (val > REVEAL / 2) {
+        } else if (canPay && val > REVEAL / 2) {
           openPay();
         } else {
           close();
@@ -114,23 +103,19 @@ export function SwipeableBillItem({
   ).current;
 
   const handleRowPress = () => {
-    if (openSide.current !== null) {
-      close();
-    } else {
-      onEdit?.();
-    }
+    if (openSide.current !== null) close();
+    else onEdit?.();
   };
 
   return (
     <View style={styles.container}>
-      {/* Pay action — revealed on right swipe */}
-      {onPay && (
+      {canPay && (
         <Animated.View style={[styles.action, styles.payAction, { backgroundColor: payBg }]}>
           <Pressable
             style={({ pressed }) => [styles.actionBtn, styles.payActionBtn, pressed && styles.actionBtnPressed]}
             onPress={firePay}
           >
-            {bill.paidAt
+            {expense.paidAt
               ? <RotateCcw size={20} color={colors.background.surface} strokeWidth={2} />
               : <Check size={22} color={colors.background.surface} strokeWidth={2.5} />
             }
@@ -138,7 +123,6 @@ export function SwipeableBillItem({
         </Animated.View>
       )}
 
-      {/* Delete action — revealed on left swipe */}
       {onDelete && (
         <Animated.View style={[styles.action, styles.deleteAction, { backgroundColor: deleteBg }]}>
           <Pressable
@@ -150,13 +134,12 @@ export function SwipeableBillItem({
         </Animated.View>
       )}
 
-      {/* Content row */}
       <Animated.View
         style={[styles.content, { transform: [{ translateX }] }]}
         {...panResponder.panHandlers}
       >
-        <BillItem
-          bill={bill}
+        <ExpenseItem
+          expense={expense}
           categories={categories}
           today={today}
           assignee={assignee}
@@ -168,24 +151,11 @@ export function SwipeableBillItem({
 }
 
 const makeStyles = (colors: Colors) => StyleSheet.create({
-  container: {
-    overflow: 'hidden',
-  },
-  content: {
-    backgroundColor: colors.background.surface,
-  },
-  action: {
-    position: 'absolute',
-    top: 0,
-    bottom: 0,
-    width: TRIGGER,
-  },
-  payAction: {
-    left: 0,
-  },
-  deleteAction: {
-    right: 0,
-  },
+  container: { overflow: 'hidden' },
+  content: { backgroundColor: colors.background.surface },
+  action: { position: 'absolute', top: 0, bottom: 0, width: TRIGGER },
+  payAction: { left: 0 },
+  deleteAction: { right: 0 },
   actionBtn: {
     position: 'absolute',
     top: 0,
@@ -194,13 +164,7 @@ const makeStyles = (colors: Colors) => StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  payActionBtn: {
-    left: 0,
-  },
-  deleteActionBtn: {
-    right: 0,
-  },
-  actionBtnPressed: {
-    opacity: 0.7,
-  },
+  payActionBtn: { left: 0 },
+  deleteActionBtn: { right: 0 },
+  actionBtnPressed: { opacity: 0.7 },
 });

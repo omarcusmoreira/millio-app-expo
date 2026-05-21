@@ -1,10 +1,9 @@
 import type {
-  Bill,
+  Expense,
   Household,
   ID,
   Silo,
   Transaction,
-  TransactionKind,
 } from './entities';
 import { cashOnHand } from './selectors';
 
@@ -33,50 +32,50 @@ export const applyTransfer = (params: {
   };
 };
 
-// ─── Mark bill paid (Inv-4) ───────────────────────────────────────────────────
+// ─── Mark expense paid (recurring only) ──────────────────────────────────────
 
-export const markBillPaid = (
+export const markExpensePaid = (
   h: Household,
-  billId: ID,
-  paidAmount: number,
-  fromAccountId: ID,
+  expenseId: ID,
   now: string,
   newTransactionId: ID,
 ): CommandResult => {
-  const bill = h.bills.find((b) => b.id === billId);
-  if (!bill) throw new Error(`Bill ${billId} not found`);
-  if (bill.paidAt) throw new Error(`Bill ${billId} already paid`);
+  const expense = h.expenses.find((e) => e.id === expenseId);
+  if (!expense) throw new Error(`Expense ${expenseId} not found`);
+  if (expense.paidAt) throw new Error(`Expense ${expenseId} already paid`);
+
+  const paidAmount = expense.amount ?? expense.estimate ?? 0;
   if (paidAmount <= 0) throw new Error('amountZero');
 
   const tx: Transaction = {
     id: newTransactionId,
-    kind: 'bill-payment',
-    name: bill.name,
+    kind: 'expense',
+    name: expense.name,
     amount: paidAmount,
     date: now,
-    byMemberId: bill.assigneeId,
-    accountId: fromAccountId,
+    byMemberId: expense.assigneeId,
+    accountId: expense.accountId,
     siloId: null,
-    billId,
-    categoryIds: [...bill.categoryIds],
+    expenseId,
+    categoryIds: [...expense.categoryIds],
+    receivedAt: null,
     createdAt: now,
   };
 
-  const updatedBill: Bill = {
-    ...bill,
+  const updatedExpense: Expense = {
+    ...expense,
     paidAt: now,
     paidAmount,
-    paidFromAccountId: fromAccountId,
     updatedAt: now,
   };
 
   return {
     household: {
       ...h,
-      bills: h.bills.map((b) => (b.id === billId ? updatedBill : b)),
+      expenses: h.expenses.map((e) => (e.id === expenseId ? updatedExpense : e)),
       transactions: [...h.transactions, tx],
     },
-    events: [{ type: 'bill.paid', billId, amount: paidAmount, accountId: fromAccountId }],
+    events: [{ type: 'expense.paid', expenseId, amount: paidAmount, accountId: expense.accountId }],
   };
 };
 
@@ -108,8 +107,9 @@ export const updateSiloValue = (
     byMemberId: h.members[0]?.id ?? '',
     accountId: null,
     siloId,
-    billId: null,
+    expenseId: null,
     categoryIds: [],
+    receivedAt: null,
     createdAt: now,
   };
 
@@ -147,8 +147,9 @@ export const transferCashToSilo = (
     byMemberId: h.members[0]?.id ?? '',
     accountId: fromAccountId,
     siloId,
-    billId: null,
+    expenseId: null,
     categoryIds: [],
+    receivedAt: null,
     createdAt: now,
   };
 
@@ -185,8 +186,9 @@ export const transferSiloToCash = (
     byMemberId: h.members[0]?.id ?? '',
     accountId: toAccountId,
     siloId,
-    billId: null,
+    expenseId: null,
     categoryIds: [],
+    receivedAt: null,
     createdAt: now,
   };
 
@@ -210,82 +212,32 @@ export const removeMember = (
 ): Household => {
   const remaining = h.members.filter((m) => m.id !== memberId);
   if (remaining.length === 0) {
-    // Household goes to archived state — out of scope for domain layer
-    // Return with no members (caller handles archival)
     return { ...h, members: [] };
   }
 
   const fallback = remaining[0];
-  if (!fallback) return h; // safety
+  if (!fallback) return h;
 
-  // Reassign all orphaned bills to the first remaining member
-  const reassignedBills = h.bills.map((b) =>
-    b.assigneeId === memberId ? { ...b, assigneeId: fallback.id } : b,
+  const reassignedExpenses = h.expenses.map((e) =>
+    e.assigneeId === memberId ? { ...e, assigneeId: fallback.id } : e,
   );
 
   return {
     ...h,
     members: remaining,
-    bills: reassignedBills,
+    expenses: reassignedExpenses,
   };
 };
 
-// ─── Allowance override ───────────────────────────────────────────────────────
+// ─── Validate expense (Inv-5) ─────────────────────────────────────────────────
 
-export const setAllowanceOverride = (
-  h: Household,
-  amount: number,
-): Household => ({
-  ...h,
-  allowance: { ...h.allowance, override: amount },
-});
-
-export const clearAllowanceOverride = (h: Household): Household => ({
-  ...h,
-  allowance: { ...h.allowance, override: null },
-});
-
-export const logAllowanceSpend = (
-  h: Household,
-  label: string,
-  amount: number,
-  byMemberId: ID,
-  date: string,
-  newTransactionId: ID,
-): CommandResult => {
-  if (amount <= 0) throw new Error('amountZero');
-
-  const tx: Transaction = {
-    id: newTransactionId,
-    kind: 'allowance-spend',
-    name: label,
-    amount,
-    date,
-    byMemberId,
-    accountId: null,
-    siloId: null,
-    billId: null,
-    categoryIds: [],
-    createdAt: date,
-  };
-
-  return {
-    household: { ...h, transactions: [...h.transactions, tx] },
-    events: [{ type: 'allowance.spent', amount, label }],
-  };
-};
-
-// ─── Validate bill (Inv-5) ────────────────────────────────────────────────────
-
-export const validateBill = (
-  bill: Pick<Bill, 'variable' | 'amount' | 'estimate'>,
+export const validateExpense = (
+  expense: Pick<Expense, 'variable' | 'amount' | 'estimate'>,
 ): boolean => {
-  if (bill.variable) {
-    // Variable bills: amount must be null; estimate may be null (not yet set)
-    return bill.amount === null;
+  if (expense.variable) {
+    return expense.amount === null;
   }
-  // Fixed bills: amount must be a number, estimate must be null
-  return typeof bill.amount === 'number' && bill.estimate === null;
+  return typeof expense.amount === 'number' && expense.estimate === null;
 };
 
 // ─── Deduplicate category/label IDs (Inv-14) ─────────────────────────────────

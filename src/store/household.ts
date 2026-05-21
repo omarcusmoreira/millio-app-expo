@@ -3,14 +3,12 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { monotonicFactory } from 'ulid';
 const ulid = monotonicFactory(Math.random);
-import type { Bill, CashAccount, Category, ColorToken, Household, Income, Label, Member, Silo, Transaction } from '../domain/entities';
+import type { CashAccount, Category, ColorToken, Expense, Household, Income, Label, Member, Silo, Transaction } from '../domain/entities';
 import {
   transferCashToSilo,
   transferSiloToCash,
   updateSiloValue,
-  setAllowanceOverride,
-  clearAllowanceOverride,
-  logAllowanceSpend,
+  markExpensePaid as _markExpensePaid,
 } from '../domain/commands';
 import {
   cashOnHand,
@@ -18,7 +16,7 @@ import {
   suggestedWeeklyAllowance,
   effectiveAllowance,
   weeklySpent,
-  pendingBills,
+  pendingExpenses,
   totalPending,
   netWorth,
   nextPaycheck,
@@ -32,7 +30,10 @@ interface HouseholdState {
   // Mutators
   setHousehold: (h: Household) => void;
   setToday: (today: string) => void;
-  addBill: (draft: Omit<Bill, 'id' | 'paidAt' | 'paidAmount' | 'paidFromAccountId' | 'createdAt' | 'updatedAt'>) => void;
+  addExpense: (draft: Omit<Expense, 'id' | 'createdAt' | 'updatedAt'>) => void;
+  updateExpense: (id: string, draft: Partial<Omit<Expense, 'id' | 'createdAt'>>) => void;
+  deleteExpense: (id: string) => void;
+  markExpensePaid: (expenseId: string) => void;
   addSilo: (draft: Omit<Silo, 'id' | 'createdAt' | 'updatedAt'>) => void;
   addTransaction: (draft: Omit<Transaction, 'id' | 'createdAt'>) => void;
   updateTransaction: (id: string, draft: Partial<Omit<Transaction, 'id' | 'createdAt'>>) => void;
@@ -43,8 +44,6 @@ interface HouseholdState {
   removeLabel: (id: string) => void;
   addCashAccount: (draft: Omit<CashAccount, 'id'>) => void;
   removeCashAccount: (id: string) => void;
-  updateBill: (id: string, draft: Partial<Omit<Bill, 'id' | 'createdAt'>>) => void;
-  deleteBill: (id: string) => void;
   addIncome: (draft: Omit<Income, 'id' | 'createdAt'>) => void;
   updateIncome: (id: string, draft: Partial<Omit<Income, 'id' | 'createdAt'>>) => void;
   deleteIncome: (id: string) => void;
@@ -60,9 +59,7 @@ interface HouseholdState {
   updateSiloValue: (siloId: string, newValue: number) => void;
   transferToSilo: (siloId: string, amount: number, fromAccountId: string) => void;
   transferFromSilo: (siloId: string, amount: number, toAccountId: string) => void;
-  setAllowanceOverride: (amount: number) => void;
-  clearAllowanceOverride: () => void;
-  logAllowanceSpend: (label: string, amount: number) => void;
+  markIncomeReceived: (txId: string) => void;
 
   // Derived selectors (computed from state)
   cashOnHand: () => number;
@@ -77,14 +74,6 @@ interface HouseholdState {
 
 const todayISO = (): string => new Date().toISOString().slice(0, 10);
 
-function currentWeekMonday(isoDate: string): string {
-  const d = new Date(isoDate + 'T00:00:00Z');
-  const day = d.getUTCDay(); // 0=Sun
-  const diff = day === 0 ? -6 : 1 - day;
-  d.setUTCDate(d.getUTCDate() + diff);
-  return d.toISOString().slice(0, 10);
-}
-
 export const useHouseholdStore = create<HouseholdState>()(
   persist(
   (set, get) => ({
@@ -92,31 +81,74 @@ export const useHouseholdStore = create<HouseholdState>()(
   today: todayISO(),
 
   setHousehold: (h) => set({ household: h }),
-  setToday: (today) => {
-    const { household } = get();
-    if (!household) { set({ today }); return; }
-    const monday = currentWeekMonday(today);
-    if (monday !== household.allowance.weekStart) {
-      set({ today, household: { ...household, allowance: { ...household.allowance, weekStart: monday } } });
-    } else {
-      set({ today });
-    }
-  },
+  setToday: (today) => set({ today }),
 
-  addBill: (draft) => {
+  addExpense: (draft) => {
     const { household, today } = get();
     if (!household) return;
     const now = today;
-    const bill: Bill = {
+    const expenseId = ulid();
+    const expense: Expense = {
       ...draft,
-      id: ulid(),
-      paidAt: null,
-      paidAmount: null,
-      paidFromAccountId: null,
+      id: expenseId,
       createdAt: now,
       updatedAt: now,
     };
-    set({ household: { ...household, bills: [...household.bills, bill] } });
+    let transactions = [...household.transactions];
+    if (draft.recurring === 'one-time') {
+      const tx: Transaction = {
+        id: ulid(),
+        kind: 'expense',
+        name: draft.name,
+        amount: draft.amount ?? draft.estimate ?? 0,
+        date: draft.date,
+        byMemberId: draft.assigneeId,
+        accountId: draft.accountId,
+        siloId: null,
+        expenseId,
+        categoryIds: [...draft.categoryIds],
+        receivedAt: null,
+        createdAt: now,
+      };
+      transactions = [...transactions, tx];
+    }
+    set({ household: { ...household, expenses: [...household.expenses, expense], transactions } });
+  },
+
+  updateExpense: (id, draft) => {
+    const { household, today } = get();
+    if (!household) return;
+    const existing = household.expenses.find((e) => e.id === id);
+    if (!existing) return;
+    const updated = { ...existing, ...draft, updatedAt: today };
+    let transactions = household.transactions;
+    if (existing.recurring === 'one-time') {
+      transactions = transactions.map((t) =>
+        t.expenseId === id
+          ? { ...t, amount: updated.amount ?? updated.estimate ?? 0, date: updated.date, accountId: updated.accountId }
+          : t
+      );
+    }
+    set({ household: { ...household, expenses: household.expenses.map((e) => e.id === id ? updated : e), transactions } });
+  },
+
+  deleteExpense: (id) => {
+    const { household } = get();
+    if (!household) return;
+    set({
+      household: {
+        ...household,
+        expenses: household.expenses.filter((e) => e.id !== id),
+        transactions: household.transactions.filter((t) => t.expenseId !== id),
+      },
+    });
+  },
+
+  markExpensePaid: (expenseId) => {
+    const { household, today } = get();
+    if (!household) return;
+    const result = _markExpensePaid(household, expenseId, today, ulid());
+    set({ household: result.household });
   },
 
   addSilo: (draft) => {
@@ -152,6 +184,22 @@ export const useHouseholdStore = create<HouseholdState>()(
     set({ household: { ...household, transactions: household.transactions.filter((t) => t.id !== id) } });
   },
 
+  markIncomeReceived: (txId) => {
+    const { household, today } = get();
+    if (!household) return;
+    const tx = household.transactions.find((t) => t.id === txId);
+    if (!tx || tx.kind !== 'income') return;
+    const receivedAt = tx.receivedAt === null ? today : null;
+    set({
+      household: {
+        ...household,
+        transactions: household.transactions.map((t) =>
+          t.id === txId ? { ...t, receivedAt } : t
+        ),
+      },
+    });
+  },
+
   updateSiloValue: (siloId, newValue) => {
     const { household, today } = get();
     if (!household) return;
@@ -171,18 +219,6 @@ export const useHouseholdStore = create<HouseholdState>()(
     if (!household) return;
     const result = transferSiloToCash(household, siloId, amount, toAccountId, today, ulid());
     set({ household: result.household });
-  },
-
-  setAllowanceOverride: (amount) => {
-    const { household } = get();
-    if (!household) return;
-    set({ household: setAllowanceOverride(household, amount) });
-  },
-
-  clearAllowanceOverride: () => {
-    const { household } = get();
-    if (!household) return;
-    set({ household: clearAllowanceOverride(household) });
   },
 
   addCategory: (name, color) => {
@@ -222,18 +258,6 @@ export const useHouseholdStore = create<HouseholdState>()(
     const { household } = get();
     if (!household) return;
     set({ household: { ...household, cashAccounts: household.cashAccounts.filter((a) => a.id !== id) } });
-  },
-
-  updateBill: (id, draft) => {
-    const { household, today } = get();
-    if (!household) return;
-    set({ household: { ...household, bills: household.bills.map((b) => b.id === id ? { ...b, ...draft, updatedAt: today } : b) } });
-  },
-
-  deleteBill: (id) => {
-    const { household } = get();
-    if (!household) return;
-    set({ household: { ...household, bills: household.bills.filter((b) => b.id !== id) } });
   },
 
   addIncome: (draft) => {
@@ -317,14 +341,6 @@ export const useHouseholdStore = create<HouseholdState>()(
     set({ household: { ...household, members: household.members.filter((m) => m.id !== id) } });
   },
 
-  logAllowanceSpend: (label, amount) => {
-    const { household, today } = get();
-    if (!household) return;
-    const memberId = household.members[0]?.id ?? '';
-    const result = logAllowanceSpend(household, label, amount, memberId, today, ulid());
-    set({ household: result.household });
-  },
-
   cashOnHand: () => {
     const { household } = get();
     return household ? cashOnHand(household) : 0;
@@ -336,7 +352,7 @@ export const useHouseholdStore = create<HouseholdState>()(
   },
 
   totalPending: () => {
-    const { household, today } = get();
+    const { household } = get();
     return household ? totalPending(household) : 0;
   },
 
@@ -351,8 +367,8 @@ export const useHouseholdStore = create<HouseholdState>()(
   },
 
   weeklySpent: () => {
-    const { household } = get();
-    return household ? weeklySpent(household) : 0;
+    const { household, today } = get();
+    return household ? weeklySpent(household, today) : 0;
   },
 
   netWorth: () => {
@@ -369,5 +385,52 @@ export const useHouseholdStore = create<HouseholdState>()(
     name: 'milio-household',
     storage: createJSONStorage(() => AsyncStorage),
     partialize: (s) => ({ household: s.household, today: s.today }),
+    version: 3,
+    migrate: (persisted: unknown, version: number) => {
+      const state = persisted as Record<string, unknown>;
+      if (version < 2 && state.household) {
+        const h = state.household as Record<string, unknown>;
+        // bills → expenses: rename field, map due→date, paidFromAccountId→accountId
+        if (Array.isArray(h.bills) && !Array.isArray(h.expenses)) {
+          h.expenses = (h.bills as Record<string, unknown>[]).map((b) => ({
+            ...b,
+            date: b.due ?? b.date,
+            accountId: b.paidFromAccountId ?? b.accountId ?? null,
+            recurring: b.recurring ?? 'monthly',
+            endsAt: b.endsAt ?? null,
+            due: undefined,
+            paidFromAccountId: undefined,
+          }));
+          delete h.bills;
+        }
+        if (!Array.isArray(h.expenses)) h.expenses = [];
+        // Remove allowance field
+        delete h.allowance;
+        // Fix transactions: bill-payment → expense, billId → expenseId
+        if (Array.isArray(h.transactions)) {
+          h.transactions = (h.transactions as Record<string, unknown>[]).map((t) => ({
+            ...t,
+            kind: t.kind === 'bill-payment' || t.kind === 'allowance-spend' ? 'expense' : t.kind,
+            expenseId: t.expenseId ?? t.billId ?? null,
+            billId: undefined,
+          }));
+        }
+        state.household = h;
+      }
+      if (version < 3 && state.household) {
+        const h = state.household as Record<string, unknown>;
+        // Add receivedAt: existing income tx = already received (set to date); others = null
+        if (Array.isArray(h.transactions)) {
+          h.transactions = (h.transactions as Record<string, unknown>[]).map((t) => ({
+            ...t,
+            receivedAt: !('receivedAt' in t)
+              ? (t.kind === 'income' ? (t.date ?? null) : null)
+              : t.receivedAt,
+          }));
+        }
+        state.household = h;
+      }
+      return state;
+    },
   }
 ));

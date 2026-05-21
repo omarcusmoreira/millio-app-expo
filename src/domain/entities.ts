@@ -36,21 +36,21 @@ export type RecurrenceKind =
   | 'yearly'
   | 'one-time';
 
-export interface Bill {
+export interface Expense {
   id: ID;
   name: string;
-  amount: number | null;
-  estimate: number | null;
+  amount: number | null;     // null if variable
+  estimate: number | null;   // set if variable, null otherwise
   variable: boolean;
-  due: string; // ISO YYYY-MM-DD
+  date: string;              // one-time: when paid; recurring: anchor/first due date (ISO YYYY-MM-DD)
   recurring: RecurrenceKind;
+  endsAt: string | null;     // ISO; null = repeats indefinitely (recurring only)
   assigneeId: ID;
+  accountId: ID | null;
   categoryIds: ID[];
   labelIds: ID[];
-  endsAt: string | null; // ISO; null = repeats indefinitely
-  paidAt: string | null; // ISO; null = not paid
+  paidAt: string | null;     // one-time: = date at creation; recurring: null until paid
   paidAmount: number | null;
-  paidFromAccountId: ID | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -85,9 +85,7 @@ export type TransactionKind =
   | 'income'
   | 'transfer-in'
   | 'transfer-out'
-  | 'asset-update'
-  | 'bill-payment'
-  | 'allowance-spend';
+  | 'asset-update';
 
 export interface Transaction {
   id: ID;
@@ -98,14 +96,10 @@ export interface Transaction {
   byMemberId: ID;
   accountId: ID | null;
   siloId: ID | null;
-  billId: ID | null;
+  expenseId: ID | null;
   categoryIds: ID[];
+  receivedAt: string | null; // income only: null = pending, string = received date
   createdAt: string;
-}
-
-export interface WeeklyAllowance {
-  weekStart: string; // ISO Monday
-  override: number | null;
 }
 
 export interface Household {
@@ -116,19 +110,18 @@ export interface Household {
   cashAccounts: CashAccount[];
   categories: Category[];
   labels: Label[];
-  bills: Bill[];
+  expenses: Expense[];
   silos: Silo[];
   incomes: Income[];
   transactions: Transaction[];
-  allowance: WeeklyAllowance;
   locale: Locale;
   createdAt: string;
 }
 
 export type DomainEvent =
-  | { type: 'bill.created'; bill: Bill }
-  | { type: 'bill.paid'; billId: ID; amount: number; accountId: ID }
-  | { type: 'bill.deleted'; billId: ID }
+  | { type: 'expense.created'; expense: Expense }
+  | { type: 'expense.paid'; expenseId: ID; amount: number; accountId: ID | null }
+  | { type: 'expense.deleted'; expenseId: ID }
   | { type: 'silo.created'; silo: Silo }
   | { type: 'silo.updated'; siloId: ID; before: number; after: number }
   | {
@@ -138,10 +131,8 @@ export type DomainEvent =
       siloId: ID;
       accountId: ID;
     }
-  | { type: 'expense'; amount: number; accountId: ID }
+  | { type: 'expense'; amount: number; accountId: ID | null }
   | { type: 'income'; amount: number; accountId: ID; memberId: ID }
-  | { type: 'allowance.spent'; amount: number }
-  | { type: 'allowance.adjusted'; override: number | null }
   | { type: 'member.added'; member: Member }
   | { type: 'member.removed'; memberId: ID }
   | { type: 'locale.changed'; from: Locale; to: Locale };

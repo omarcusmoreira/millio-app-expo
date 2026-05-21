@@ -1,17 +1,16 @@
 import React, { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { Archive, Calendar, ShoppingCart, TrendingUp } from 'lucide-react-native';
+import { Archive, ShoppingCart, TrendingUp } from 'lucide-react-native';
 import { Sheet } from './Sheet';
 import { NewExpenseSheet } from './NewExpenseSheet';
 import { NewIncomeSheet } from './NewIncomeSheet';
-import { NewBillSheet } from './NewBillSheet';
 import { NewSiloSheet } from './NewSiloSheet';
 import { font, radius, spacing } from '../tokens';
 import type { Colors } from '../tokens';
 import { useColors } from '../theme';
 
-type ActionKind = 'expense' | 'income' | 'bill' | 'silo' | null;
+type ActionKind = 'expense' | 'income' | 'silo' | null;
 
 interface AddSheetProps {
   open: boolean;
@@ -40,12 +39,6 @@ export function AddSheet({ open, onClose }: AddSheetProps) {
             onPress={() => setAction('expense')}
           />
           <KindCard
-            icon={<Calendar size={18} color={colors.brand.terracotta} strokeWidth={1.8} />}
-            title={t('addSheet.kinds.bill.title')}
-            sub={t('addSheet.kinds.bill.sub')}
-            onPress={() => setAction('bill')}
-          />
-          <KindCard
             icon={<TrendingUp size={18} color={colors.brand.terracotta} strokeWidth={1.8} />}
             title={t('addSheet.kinds.income.title')}
             sub={t('addSheet.kinds.income.sub')}
@@ -62,7 +55,6 @@ export function AddSheet({ open, onClose }: AddSheetProps) {
 
       <NewExpenseSheet open={action === 'expense'} onClose={handleClose} />
       <NewIncomeSheet  open={action === 'income'}  onClose={handleClose} />
-      <NewBillSheet    open={action === 'bill'}     onClose={handleClose} />
       <NewSiloSheet    open={action === 'silo'}     onClose={handleClose} />
     </>
   );

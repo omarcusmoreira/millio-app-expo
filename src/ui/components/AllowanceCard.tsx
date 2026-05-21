@@ -1,6 +1,5 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
-  Pressable,
   StyleSheet,
   Text,
   View,
@@ -14,7 +13,6 @@ import {
 import { font, radius, spacing } from '../tokens';
 import type { Colors } from '../tokens';
 import { useColors } from '../theme';
-import { NewExpenseSheet } from './NewExpenseSheet';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -37,13 +35,12 @@ export function AllowanceCard() {
   const { t } = useTranslation();
   const colors = useColors();
   const styles = makeStyles(colors);
-  const [sheetOpen, setSheetOpen] = useState(false);
 
   const household = useHouseholdStore((s) => s.household);
   const today = useHouseholdStore((s) => s.today);
 
   const effective = household ? computeEffectiveAllowance(household, today) : 0;
-  const spent = household ? computeWeeklySpent(household) : 0;
+  const spent = household ? computeWeeklySpent(household, today) : 0;
   const remaining = Math.max(0, effective - spent);
 
   const progress = effective > 0 ? Math.min(1, spent / effective) : 0;
@@ -92,20 +89,8 @@ export function AllowanceCard() {
             {formatBRL(remaining)}{' '}
             <Text style={styles.statLabel}>{t('allowance.remaining').toLowerCase()}</Text>
           </Text>
-
-          {/* Register button */}
-          <Pressable
-            style={({ pressed }) => [styles.registerBtn, pressed && styles.registerBtnPressed]}
-            onPress={() => setSheetOpen(true)}
-            accessibilityRole="button"
-            accessibilityLabel={t('allowance.logSpend')}
-          >
-            <Text style={styles.registerLabel}>+ {t('allowance.logSpend')}</Text>
-          </Pressable>
         </View>
       </View>
-
-      <NewExpenseSheet open={sheetOpen} onClose={() => setSheetOpen(false)} />
     </>
   );
 }
@@ -186,23 +171,5 @@ const makeStyles = (colors: Colors) => StyleSheet.create({
     fontFamily: font.family.sans,
     fontSize: font.size.small,
     color: colors.ink[4],
-  },
-  registerBtn: {
-    marginLeft: 'auto',
-    paddingHorizontal: spacing[4],
-    paddingVertical: spacing[2],
-    borderRadius: radius.pill,
-    borderWidth: 1,
-    borderColor: colors.border.emphasis,
-    backgroundColor: colors.background.surface,
-  },
-  registerBtnPressed: {
-    opacity: 0.6,
-  },
-  registerLabel: {
-    fontFamily: font.family.sans,
-    fontSize: font.size.small,
-    fontWeight: font.weight.medium,
-    color: colors.ink[1],
   },
 });

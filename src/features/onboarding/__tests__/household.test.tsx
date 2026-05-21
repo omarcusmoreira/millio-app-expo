@@ -79,7 +79,7 @@ describe('Feature: Household choice', () => {
       const household = useHouseholdStore.getState().household;
       expect(household).not.toBeNull();
       expect(household?.members).toHaveLength(1);
-      expect(household?.members[0].name).toBe('Marcus');
+      expect(household?.members[0]?.name).toBe('Marcus');
     });
   });
 

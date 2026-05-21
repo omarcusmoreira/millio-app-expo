@@ -1,23 +1,19 @@
 // Thin adapter over commands.ts that auto-generates transaction IDs.
-// Used by Gherkin step definitions and UI mutation handlers.
 import { monotonicFactory } from 'ulid';
 const ulid = monotonicFactory(Math.random);
 import {
-  markBillPaid as _markBillPaid,
+  markExpensePaid as _markExpensePaid,
   updateSiloValue as _updateSiloValue,
   transferCashToSilo as _transferCashToSilo,
   transferSiloToCash as _transferSiloToCash,
 } from './commands';
-import type { Household, ID, Transaction } from './entities';
-import { cashOnHand } from './selectors';
+import type { Expense, Household, ID, Transaction } from './entities';
 
-export const markBillPaid = (
+export const markExpensePaid = (
   h: Household,
-  billId: ID,
-  paidAmount: number,
-  fromAccountId: ID,
+  expenseId: ID,
   now: string,
-): Household => _markBillPaid(h, billId, paidAmount, fromAccountId, now, ulid()).household;
+): Household => _markExpensePaid(h, expenseId, now, ulid()).household;
 
 export const updateSiloValue = (
   h: Household,
@@ -38,26 +34,52 @@ export const addTransfer = (
     ? _transferCashToSilo(h, siloId, amount, accountId, now, ulid()).household
     : _transferSiloToCash(h, siloId, amount, accountId, now, ulid()).household;
 
-export const addExpense = (
+// Add a one-time expense: creates Expense (paidAt = date) + expense Transaction.
+export const addOneTimeExpense = (
   h: Household,
-  amount: number,
-  accountId: ID,
-  memberId: ID,
   name: string,
+  amount: number,
+  accountId: ID | null,
+  memberId: ID,
+  date: string,
   now: string,
 ): Household => {
-  const tx: Transaction = {
-    id: ulid(),
-    kind: 'allowance-spend',
+  const expenseId = ulid();
+  const expense: Expense = {
+    id: expenseId,
     name,
     amount,
-    date: now,
+    estimate: null,
+    variable: false,
+    date,
+    recurring: 'one-time',
+    endsAt: null,
+    assigneeId: memberId,
+    accountId,
+    categoryIds: [],
+    labelIds: [],
+    paidAt: date,
+    paidAmount: amount,
+    createdAt: now,
+    updatedAt: now,
+  };
+  const tx: Transaction = {
+    id: ulid(),
+    kind: 'expense',
+    name,
+    amount,
+    date,
     byMemberId: memberId,
     accountId,
     siloId: null,
-    billId: null,
+    expenseId,
     categoryIds: [],
+    receivedAt: null,
     createdAt: now,
   };
-  return { ...h, transactions: [...h.transactions, tx] };
+  return {
+    ...h,
+    expenses: [...h.expenses, expense],
+    transactions: [...h.transactions, tx],
+  };
 };

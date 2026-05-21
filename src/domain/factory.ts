@@ -8,14 +8,6 @@ export function buildFreshHousehold(memberName: string): Household {
   const memberId = ulid();
   const accountId = ulid();
 
-  // Monday of the current week
-  const today = new Date();
-  const day = today.getDay(); // 0=Sun
-  const daysFromMonday = (day === 0 ? 6 : day - 1);
-  const monday = new Date(today);
-  monday.setDate(today.getDate() - daysFromMonday);
-  const weekStart = monday.toISOString().slice(0, 10);
-
   return {
     id: ulid(),
     name: null,
@@ -38,11 +30,10 @@ export function buildFreshHousehold(memberName: string): Household {
     ],
     categories: [],
     labels: [],
-    bills: [],
+    expenses: [],
     silos: [],
     incomes: [],
     transactions: [],
-    allowance: { weekStart, override: null },
     locale: 'pt-BR',
     createdAt: now,
   };

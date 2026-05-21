@@ -1,31 +1,31 @@
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import type { Bill, Category, Member } from '../../domain/entities';
-import { billStatus } from '../../domain/selectors';
+import type { Category, Expense, Member } from '../../domain/entities';
+import { expenseStatus } from '../../domain/selectors';
 import { CategoryChip, MemberAvatar, Money } from '../primitives';
 import { font, spacing } from '../tokens';
 import type { Colors } from '../tokens';
 import { useColors } from '../theme';
 
-interface BillItemProps {
-  bill: Bill;
+interface ExpenseItemProps {
+  expense: Expense;
   categories: Category[];
   today: string;
   assignee?: Member | undefined;
   onPress?: () => void;
 }
 
-export function BillItem({ bill, categories, today, assignee, onPress }: BillItemProps) {
+export function ExpenseItem({ expense, categories, today, assignee, onPress }: ExpenseItemProps) {
   const { t } = useTranslation();
   const colors = useColors();
   const styles = makeStyles(colors);
-  const status = billStatus(bill, today);
+  const status = expenseStatus(expense, today);
   const isPaid = status === 'paid';
   const isOverdue = status === 'overdue';
-  const primaryCategory = categories.find((c) => c.id === bill.categoryIds[0]);
-  const amount = bill.amount ?? bill.estimate ?? 0;
-  const dueLabel = getDueLabel(bill.due, today, t);
+  const primaryCategory = categories.find((c) => c.id === expense.categoryIds[0]);
+  const amount = expense.amount ?? expense.estimate ?? 0;
+  const dateLabel = getDateLabel(expense.date, today, t);
 
   return (
     <Pressable
@@ -33,7 +33,6 @@ export function BillItem({ bill, categories, today, assignee, onPress }: BillIte
       onPress={onPress}
       disabled={!onPress}
     >
-      {/* Avatar on the left */}
       <View style={styles.avatarWrap}>
         {assignee ? (
           <MemberAvatar member={assignee} size="sm" />
@@ -42,10 +41,9 @@ export function BillItem({ bill, categories, today, assignee, onPress }: BillIte
         )}
       </View>
 
-      {/* Info */}
       <View style={styles.info}>
         <Text style={[styles.name, isPaid && styles.namePaid]} numberOfLines={1}>
-          {bill.name}
+          {expense.name}
         </Text>
         <View style={styles.meta}>
           {primaryCategory && (
@@ -54,19 +52,12 @@ export function BillItem({ bill, categories, today, assignee, onPress }: BillIte
               <Text style={styles.metaSep}>·</Text>
             </>
           )}
-          <Text
-            style={[
-              styles.due,
-              isOverdue && styles.dueOverdue,
-              isPaid && styles.duePaid,
-            ]}
-          >
-            {dueLabel}
+          <Text style={[styles.dateText, isOverdue && styles.dateOverdue, isPaid && styles.datePaid]}>
+            {dateLabel}
           </Text>
         </View>
       </View>
 
-      {/* Amount */}
       <Money
         value={amount}
         variant="inline"
@@ -77,13 +68,13 @@ export function BillItem({ bill, categories, today, assignee, onPress }: BillIte
   );
 }
 
-function getDueLabel(
-  due: string,
+function getDateLabel(
+  date: string,
   today: string,
   t: ReturnType<typeof useTranslation>['t'],
 ): string {
-  if (due === today) return t('bills.due.today');
-  const diff = daysBetween(today, due);
+  if (date === today) return t('bills.due.today');
+  const diff = daysBetween(today, date);
   if (diff === 1) return t('bills.due.tomorrow');
   if (diff === -1) return t('bills.due.yesterday');
   if (diff > 1) return t('bills.due.inDays', { n: diff });
@@ -106,9 +97,7 @@ const makeStyles = (colors: Colors) => StyleSheet.create({
     paddingHorizontal: spacing[7],
     gap: spacing[4],
   },
-  rowPressed: {
-    opacity: 0.7,
-  },
+  rowPressed: { opacity: 0.7 },
   avatarWrap: {
     width: AVATAR_SM,
     alignItems: 'center',
@@ -121,43 +110,27 @@ const makeStyles = (colors: Colors) => StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.ink[4],
   },
-  avatarPlaceholderOverdue: {
-    borderColor: colors.brand.terracotta,
-  },
-  info: {
-    flex: 1,
-    gap: spacing[3],
-  },
+  avatarPlaceholderOverdue: { borderColor: colors.brand.terracotta },
+  info: { flex: 1, gap: spacing[3] },
   name: {
     fontFamily: font.family.sans,
     fontSize: font.size.body,
     color: colors.ink[1],
   },
-  namePaid: {
-    color: colors.ink[4],
-    textDecorationLine: 'line-through',
-  },
-  meta: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing[2],
-  },
+  namePaid: { color: colors.ink[4], textDecorationLine: 'line-through' },
+  meta: { flexDirection: 'row', alignItems: 'center', gap: spacing[2] },
   metaSep: {
     fontFamily: font.family.mono,
     fontSize: font.size.mono,
     color: colors.ink[4],
   },
-  due: {
+  dateText: {
     fontFamily: font.family.mono,
     fontSize: font.size.mono,
     color: colors.ink[4],
     letterSpacing: font.letterSpacing.eyebrow,
     textTransform: 'uppercase',
   },
-  dueOverdue: {
-    color: colors.brand.terracotta,
-  },
-  duePaid: {
-    color: colors.ink[4],
-  },
+  dateOverdue: { color: colors.brand.terracotta },
+  datePaid: { color: colors.ink[4] },
 });

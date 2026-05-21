@@ -173,12 +173,11 @@
     "paycheckIn": "{{days}} DAYS UNTIL NEXT PAYCHECK BY",
     "comingUp": "Coming up",
     "paidCount": "{{paid}} PAID · {{remaining}} LEFT",
-    "seeAll": "See all bills →",
-    "recentExpenses": "Recent expenses"
+    "seeAll": "See all bills →"
   },
   "bills": {
-    "tabLabel": "Bills",
-    "title": "Bills",
+    "tabLabel": "Expenses",
+    "title": "Expenses",
     "viewingPast": "PAST MONTH · HISTORICAL",
     "viewingFuture": "FUTURE MONTH · PROJECTED",
     "filter": {
@@ -194,6 +193,7 @@
     },
     "newObligation": "New bill",
     "empty": "Nothing here.",
+    "spentThisMonth": "Spent this month",
     "estimate": "EST",
     "paidOn": "PAID {{date}}",
     "due": {
@@ -229,7 +229,8 @@
       "biweekly": "Every 2 weeks",
       "yearly": "Once a year",
       "one-time": "One-off"
-    }
+    },
+    "deleteExpense": "Delete expense"
   },
   "silos": {
     "tabLabel": "Silos",
@@ -273,7 +274,7 @@
     "kinds": {
       "expense": {
         "title": "Expense",
-        "sub": "Money consumed. Groceries, dinner, a one-off bill."
+        "sub": "Money consumed. A one-off purchase or a recurring expense."
       },
       "income": {
         "title": "Income",
@@ -286,10 +287,6 @@
       "asset": {
         "title": "Silo",
         "sub": "Savings, property, investment. Store it outside your spendable."
-      },
-      "bill": {
-        "title": "Conta",
-        "sub": "Recurring bill that comes every month."
       }
     },
     "expense": {
@@ -299,7 +296,25 @@
       "paidFrom": "Paid from",
       "whoPaid": "Who paid",
       "submit": "Log expense",
-      "successFlash": "Expense logged"
+      "save": "Save",
+      "editTitle": "Edit expense",
+      "successFlash": "Expense logged",
+      "isRecurring": "Recurring",
+      "recurrenceKind": "Repeats",
+      "recurrence": {
+        "monthly": "Every month",
+        "biweekly": "Every 2 weeks",
+        "weekly": "Every week",
+        "bimonthly": "Every 2 months",
+        "yearly": "Once a year"
+      },
+      "date": "Date",
+      "dueDate": "Due date",
+      "variableLabel": "Variable amount",
+      "estimatePlaceholder": "Estimate (optional)",
+      "endsAtToggle": "Fixed number of installments",
+      "installments": "How many installments?",
+      "installmentsPlaceholder": "E.g. 12"
     },
     "transfer": {
       "amount": "Amount",
@@ -362,7 +377,6 @@
     "thisWeek": "This week",
     "remaining": "Remaining",
     "of": "of",
-    "logSpend": "Atualizar",
     "spent": "{{value}} SPENT",
     "youSet": "YOU SET",
     "weekDots": [
