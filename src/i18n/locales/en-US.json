@@ -173,7 +173,10 @@
     "paycheckIn": "{{days}} DAYS UNTIL NEXT PAYCHECK BY",
     "comingUp": "Coming up",
     "paidCount": "{{paid}} PAID · {{remaining}} LEFT",
-    "seeAll": "See all bills →"
+    "seeAll": "See all bills →",
+    "commitBarFixed": "FIXED",
+    "commitBarVariable": "VAR",
+    "commitBarFree": "FREE"
   },
   "bills": {
     "tabLabel": "Expenses",

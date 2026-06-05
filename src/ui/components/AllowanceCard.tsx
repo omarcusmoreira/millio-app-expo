@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   StyleSheet,
   Text,
@@ -7,34 +7,21 @@ import {
 import { useTranslation } from 'react-i18next';
 import { useHouseholdStore } from '../../store/household';
 import {
-  effectiveAllowance as computeEffectiveAllowance,
+  suggestedWeeklyAllowance as computeEffectiveAllowance,
   weeklySpent as computeWeeklySpent,
 } from '../../domain/selectors';
 import { font, radius, spacing } from '../tokens';
 import type { Colors } from '../tokens';
 import { useColors } from '../theme';
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-function formatBRL(value: number): string {
-  try {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(value);
-  } catch {
-    return `R$ ${Math.round(value)}`;
-  }
-}
+import { formatMoney } from '../primitives/Money';
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export function AllowanceCard() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const locale = i18n.language;
   const colors = useColors();
-  const styles = makeStyles(colors);
+  const styles = useMemo(() => makeStyles(colors), [colors]);
 
   const household = useHouseholdStore((s) => s.household);
   const today = useHouseholdStore((s) => s.today);
@@ -66,7 +53,7 @@ export function AllowanceCard() {
         </View>
 
         {/* Effective allowance */}
-        <Text style={styles.allowanceAmount}>{formatBRL(effective)}</Text>
+        <Text style={styles.allowanceAmount}>{formatMoney(effective, locale, false)}</Text>
 
         {/* Progress bar */}
         <View style={styles.progressTrack}>
@@ -81,12 +68,12 @@ export function AllowanceCard() {
         {/* Stats row */}
         <View style={styles.statsRow}>
           <Text style={[styles.statText, isOver && styles.statTextOver]}>
-            {formatBRL(spent)}{' '}
+            {formatMoney(spent, locale, false)}{' '}
             <Text style={styles.statLabel}>{t('allowance.sheet.spentThisWeek').toLowerCase()}</Text>
           </Text>
           <Text style={styles.statDot}>·</Text>
           <Text style={styles.statText}>
-            {formatBRL(remaining)}{' '}
+            {formatMoney(remaining, locale, false)}{' '}
             <Text style={styles.statLabel}>{t('allowance.remaining').toLowerCase()}</Text>
           </Text>
         </View>

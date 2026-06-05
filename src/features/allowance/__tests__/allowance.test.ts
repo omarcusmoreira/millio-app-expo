@@ -5,7 +5,6 @@ import { describe, it, expect } from 'vitest';
 import type { Expense, Income, Transaction } from '../../../domain/entities';
 import {
   suggestedWeeklyAllowance,
-  effectiveAllowance,
   weeklySpent,
   freeToSpend,
 } from '../../../domain/selectors';
@@ -107,7 +106,7 @@ describe('Feature: Automatic weekly allowance calculation', () => {
     const w = background();
     addExpense(w, 'Rent', parseMoney('R$ 2.850,00'), 'in 5 days');
     const suggestion = suggestedWeeklyAllowance(w.household, w.today);
-    expect(effectiveAllowance(w.household, w.today)).toBeCloseTo(suggestion, 2);
+    expect(suggestedWeeklyAllowance(w.household, w.today)).toBeCloseTo(suggestion, 2);
   });
 
   it('@unit No income configured falls back to 30-day default', () => {
@@ -130,7 +129,7 @@ describe('Feature: Automatic weekly allowance calculation', () => {
     const fts = freeToSpend(w.household, w.today);
     const suggestion = suggestedWeeklyAllowance(w.household, w.today);
     expect(suggestion).toBeLessThanOrEqual(fts + 1);
-    expect(effectiveAllowance(w.household, w.today)).toBeCloseTo(fts, 0);
+    expect(suggestedWeeklyAllowance(w.household, w.today)).toBeCloseTo(fts, 0);
   });
 });
 

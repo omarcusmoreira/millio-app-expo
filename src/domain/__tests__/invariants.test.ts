@@ -14,7 +14,6 @@ import {
 import {
   expenseStatus,
   cashOnHand,
-  effectiveAllowance,
   freeToSpend,
   netWorth,
   nextPaycheck,

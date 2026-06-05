@@ -113,6 +113,24 @@ export const totalPendingThisMonth = (h: Household, today: string): number => {
   }, 0);
 };
 
+export const pendingThisMonthBreakdown = (
+  h: Household,
+  today: string,
+): { fixed: number; variable: number } => {
+  const [year, month] = today.split('-').map(Number) as [number, number];
+  let fixed = 0;
+  let variable = 0;
+  for (const e of pendingExpenses(h)) {
+    const count = expenseOccurrencesInMonth(e, year, month).length;
+    if (e.variable) {
+      variable += count * (e.estimate ?? 0);
+    } else {
+      fixed += count * (e.amount ?? 0);
+    }
+  }
+  return { fixed, variable };
+};
+
 export function upcomingOccurrences(
   h: Household,
   today: string,
@@ -124,8 +142,7 @@ export function upcomingOccurrences(
   const rows: Array<{ expense: Expense; date: string }> = [];
 
   for (const expense of pendingExpenses(h)) {
-    for (const y of [year, nextYear]) {
-      const m = y === year ? month : nextMonth;
+    for (const [y, m] of [[year, month], [nextYear, nextMonth]] as [number, number][]) {
       for (const date of expenseOccurrencesInMonth(expense, y, m)) {
         if (date >= today) rows.push({ expense, date });
       }
@@ -163,7 +180,7 @@ export const freeToSpend = (h: Household, today: string): number => {
 // ─── Net worth ────────────────────────────────────────────────────────────────
 
 export const netWorth = (h: Household, today: string): number =>
-  cashOnHand(h) + h.silos.reduce((s, silo) => s + silo.value, 0);
+  cashOnHand(h, today) + h.silos.reduce((s, silo) => s + silo.value, 0);
 
 // ─── Paycheck ─────────────────────────────────────────────────────────────────
 
@@ -196,8 +213,6 @@ export const suggestedWeeklyAllowance = (
   return Math.min(raw, fts);
 };
 
-export const effectiveAllowance = (h: Household, today: string): number =>
-  suggestedWeeklyAllowance(h, today);
 
 export const weeklySpent = (h: Household, today: string): number => {
   const start = currentWeekMonday(today);

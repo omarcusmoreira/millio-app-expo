@@ -9,12 +9,12 @@ import {
   transferSiloToCash,
   updateSiloValue,
   markExpensePaid as _markExpensePaid,
+  removeMember as _removeMember,
 } from '../domain/commands';
 import {
   cashOnHand,
   freeToSpend,
   suggestedWeeklyAllowance,
-  effectiveAllowance,
   weeklySpent,
   pendingExpenses,
   totalPending,
@@ -338,7 +338,7 @@ export const useHouseholdStore = create<HouseholdState>()(
   removeMember: (id) => {
     const { household } = get();
     if (!household) return;
-    set({ household: { ...household, members: household.members.filter((m) => m.id !== id) } });
+    set({ household: _removeMember(household, id) });
   },
 
   cashOnHand: () => {
@@ -363,7 +363,7 @@ export const useHouseholdStore = create<HouseholdState>()(
 
   effectiveAllowance: () => {
     const { household, today } = get();
-    return household ? effectiveAllowance(household, today) : 0;
+    return household ? suggestedWeeklyAllowance(household, today) : 0;
   },
 
   weeklySpent: () => {
@@ -385,6 +385,9 @@ export const useHouseholdStore = create<HouseholdState>()(
     name: 'milio-household',
     storage: createJSONStorage(() => AsyncStorage),
     partialize: (s) => ({ household: s.household, today: s.today }),
+    onRehydrateStorage: () => (state) => {
+      if (state) state.today = todayISO();
+    },
     version: 3,
     migrate: (persisted: unknown, version: number) => {
       const state = persisted as Record<string, unknown>;

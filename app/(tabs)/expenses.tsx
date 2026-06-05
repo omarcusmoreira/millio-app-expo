@@ -85,7 +85,7 @@ function monthNavLabel(year: number, month: number, locale: string): string {
 export default function ExpensesScreen() {
   const { t, i18n } = useTranslation();
   const colors = useColors();
-  const styles = makeStyles(colors);
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const household = useHouseholdStore((s) => s.household);
   const today = useHouseholdStore((s) => s.today);
   const updateExpense = useHouseholdStore((s) => s.updateExpense);
@@ -130,7 +130,10 @@ export default function ExpensesScreen() {
     else setViewMonth((m) => m + 1);
   };
 
-  const monthRows = buildExpenseRows(allExpenses, viewYear, viewMonth);
+  const monthRows = useMemo(
+    () => buildExpenseRows(allExpenses, viewYear, viewMonth),
+    [allExpenses, viewYear, viewMonth],
+  );
 
   const totalPending = monthRows
     .filter((r) => !r.display.paidAt)
@@ -139,17 +142,21 @@ export default function ExpensesScreen() {
     .filter((r) => r.display.paidAt != null)
     .reduce((s, r) => s + (r.display.paidAmount ?? r.display.amount ?? 0), 0);
 
-  const sorted = [...monthRows]
-    .filter((r) => {
-      const status = expenseStatus(r.display, today);
-      if (filter === 'upcoming') return status !== 'paid';
-      if (filter === 'paid') return status === 'paid';
-      return true;
-    })
-    .sort((a, b) => {
-      const cmp = a.display.date.localeCompare(b.display.date);
-      return sortOrder === 'asc' ? cmp : -cmp;
-    });
+  const sorted = useMemo(
+    () =>
+      [...monthRows]
+        .filter((r) => {
+          const status = expenseStatus(r.display, today);
+          if (filter === 'upcoming') return status !== 'paid';
+          if (filter === 'paid') return status === 'paid';
+          return true;
+        })
+        .sort((a, b) => {
+          const cmp = a.display.date.localeCompare(b.display.date);
+          return sortOrder === 'asc' ? cmp : -cmp;
+        }),
+    [monthRows, filter, sortOrder, today],
+  );
 
   const memberById = (id: string) => household?.members.find((m) => m.id === id);
 

@@ -17,7 +17,7 @@ interface MoneyProps {
   strikethrough?: boolean;
 }
 
-function formatMoney(value: number, locale: string, showCents: boolean): string {
+export function formatMoney(value: number, locale: string, showCents: boolean): string {
   try {
     const currency = locale === 'pt-BR' ? 'BRL' : 'USD';
     return new Intl.NumberFormat(locale, {
